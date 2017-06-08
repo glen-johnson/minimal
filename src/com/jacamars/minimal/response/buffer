@@ -1,0 +1,5 @@
+			dt.append("<div class='text-center top-buffer bottom-medbuffer'>");
+			dt.append("<h3><em>Wow, no posted store carries this item!</em></h3>");
+			dt.append("<h4>If you know of a great business that<br>");
+			dt.append("has it for sale, please post their website above.");
+			dt.append("</div>\n");

@@ -1,0 +1,87 @@
+package com.jacamars.minimal.response;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.ArrayList;
+
+public class Query {
+	public int numFound;
+	public int start = 0;
+	public List<Document> docs;
+	
+	HashSet phones = new HashSet();
+	HashSet descriptions = new HashSet();
+	HashSet highlights = new HashSet();
+
+	public Query() {
+
+	}
+
+	public void toHtml(StringBuilder sb, Highlighting highlighting) {
+
+		StringBuilder dt = new StringBuilder();
+
+		int index = 1;
+
+		sb.append("<div class='col-lg-6 col-lg-offset-3 text-center'>\n");
+		sb.append("     <div class='btn-group' id=showDetail data-toggle='buttons'>");
+		sb.append("        <label class='btn btn-default'><input type='radio' value='on'/>Show Details</label>\n");
+		sb.append("        <label class='btn btn-default active'><input type='radio' value='off'/>Hide Details</label>\n");
+		sb.append("     </div>\n");
+		sb.append("</div>\n");
+	
+		sb.append("<div class='container-fluid search-result'>\n");
+		sb.append("   <div class='row'>\n");
+
+		sb.append("      <div id='buttons' class='section col-sm-offset-2 bottom-bigbuffer'>\n");
+		sb.append("         <div class='panel-group category-products' id='accordian'>\n");
+
+		dt.append("      <div hidden id='details' class='section col-md-9 col-md-offset-2 clearfix bottom-bigbuffer'>\n");
+		dt.append("         <div class='panel-group category-products' id='accordian'>\n");
+				
+		for (Document doc : docs) {
+			
+		//Document doc = docs.get(1);
+				
+		Field f = highlighting.get(doc.id);
+		String context = f.getContext().toString();
+		if ((phones.contains(doc.phone))==false &&
+			descriptions.contains(doc.description)==false && 
+				highlights.contains(context)==false) {
+			doc.toButtons(sb, index, context);
+			doc.toHtml(dt, index++, context);
+			//f.toHtml(sb);
+	
+			if(doc.phone != null)
+				phones.add(doc.phone);
+	
+				if (doc.description != null && doc.description.equals("none")==false && doc.description.length() != 0)
+					descriptions.add(doc.description);
+	
+				highlights.add(context);
+					
+				if (index > 300) 
+					break;
+			}
+		}
+		if(index == 1) {
+			sb.append("<h3><em>No results</em></h3>");
+		}
+				
+		sb.append("         </div>"); // panel
+		sb.append("      </div>");   // section
+
+                if(index > 1) {
+			dt.append("         </div>"); // panel
+			dt.append("      </div>"); // section
+			String html = dt.toString();
+			sb.append(html);
+		}
+
+		sb.append("   </div>"); // row
+		sb.append("</div>"); // container-fluid
+			
+		//	System.out.println("\n"+ sb.toString() + "\n");
+
+	}
+}

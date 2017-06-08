@@ -1,0 +1,186 @@
+package com.jacamars.minimal.response;
+
+import java.util.HashSet;
+
+import java.util.List;
+
+public class Query {
+	public int numFound;
+	public int start = 0;
+	public List<Document> docs;
+	
+	HashSet phones = new HashSet();
+	HashSet descriptions = new HashSet();
+	HashSet highlights = new HashSet();
+
+	public Query() {
+
+	}
+
+	public void toHtml(StringBuilder sb, Highlighting highlighting, String query) {
+
+		StringBuilder dt = new StringBuilder();
+
+		int index = 2;
+
+		sb.append("<div class='col-lg-6 col-lg-offset-3 text-center'>\n");
+
+		sb.append("     <div class='checkbox sort-info'>");
+		sb.append("        <label><input type='checkbox' name='showdetails' id='showdetails'>Hide Details &nbsp; &#8226; &nbsp; 4.6M biz postings to date</label>");
+		sb.append("     </div>");
+
+
+		//sb.append("     <div class='btn-group' id=showDetail data-toggle='buttons'>");
+		//sb.append("        <label class='btn btn-default active'><input type='radio' value='on'/>Show Details</label>\n");
+		//sb.append("        <label class='btn btn-default'><input type='radio' value='off'/>Hide Details</label>\n");
+		//sb.append("     </div>");
+
+
+		sb.append("</div>\n");
+	
+		sb.append("<div class='container search-result'>\n");
+		sb.append("   <div class='row'>\n");
+
+		sb.append("      <div hidden id='buttons' class='section col-sm-12 bottom-bigbuffer'>\n");
+		sb.append("         <div class='panel-group category-products' id='accordian'>\n");
+
+		dt.append("      <div id='details' class='section col-md-9 col-md-offset-2 clearfix bottom-bigbuffer'>\n");
+		dt.append("         <div class='panel-group category-products' id='accordian'>\n");
+
+                // the first button is Amazon which is a pulldown
+                query = query.replaceAll("AND", "");
+                query = query.replaceAll("\"", "");
+                getAmazonButton(sb, query);
+                getAmazonDetails(dt, query);
+				
+
+		for (Document doc : docs) {
+			
+		//Document doc = docs.get(1);
+				
+		Field f = highlighting.get(doc.id);
+		String context = f.getContext().toString();
+		if ((phones.contains(doc.phone))==false &&
+			//descriptions.contains(doc.description)==false && 
+				highlights.contains(context)==false) {
+			doc.toButtons(sb, index, context);
+			doc.toHtml(dt, index++, context);
+			//f.toHtml(sb);
+	
+			if(doc.phone != null)
+				phones.add(doc.phone);
+	
+				//if (doc.description != null && doc.description.equals("none")==false && doc.description.length() != 0)
+				//	descriptions.add(doc.description);
+	
+				highlights.add(context);
+					
+				if (index > 300) 
+					break;
+			}
+		}
+		if(index == 1) {
+			sb.append("<h3><em>No results</em></h3>");
+		}
+				
+		sb.append("         </div>"); // panel
+		sb.append("      </div>");   // section
+
+                if(index > 1) {
+			dt.append("         </div>"); // panel
+			dt.append("      </div>"); // section
+			String html = dt.toString();
+			sb.append(html);
+		}
+
+		sb.append("   </div>"); // row
+		sb.append("</div>"); // container-fluid
+			
+		//	System.out.println("\n"+ sb.toString() + "\n");
+
+	}
+
+	public void getAmazonDetails(StringBuilder page, String query) {
+                query = query.replaceAll("AND", "");
+                query = query.replaceAll("\"", "");
+
+		page.append("         <div class=\"btn-group\">\n");
+		page.append("   <button type=\"button\" class=\"btn btn-lg btn-default indexpadding disabled\">1</button>\n");
+		page.append("            <button type=\"button\" class=\"btn btn-lg btn-info dropdown-toggle\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\">Amazon <span class=\"caret-right\"></span></button>\n");
+		page.append("             <ul class=\"dropdown-menu\" role=\"menu\">\n");
+			
+		page.append("            <li><a href=\"http://www.amazon.com/s/ref=nb_sb_noss_2?url=search-alias%3Daps&field-keywords=" + query + "\" target='_blank'><img src=\"/images/home/amazon.gif\" alt=\"Amazon\"></a><li>\n");
+				
+		page.append("            <li><a href=\"http://www.ebay.com/sch/i.html?_nkw=" + query + "\" target='_blank'><img src=\"/images/home/ebay.jpg\" alt=\"Ebay\"></a><li>\n");
+
+		//page.append("            <li><a href=\"http://www.costco.com/CatalogSearch?storeId=10301&catalogId=10701&langId=-1&refine=&keyword=" + query + "\" target='_blank'><img src=\"/images/home/costco.gif\" alt=\"Costco\"></a><li>\n");
+				
+		//page.append("            <li><a href=\"http://www.walmart.com/search/?query=" + query + "\" target='_blank'><img src=\"/images/home/walmart.gif\" alt=\"Walmart\"></a><li>\n");
+				
+		page.append("                <li role=\"separator\" class=\"divider\"></li>\n"); 
+
+		page.append("            <li><a href=\"http://search.yahoo.com/search/?p=" + query + "\" target='_blank'><img src=\"/images/home/yahoo.gif\" alt=\"Yahoo\"></a><li>\n");
+				
+		page.append("            <li><a href=\"https://www.google.com/search?q=" + query + "&ie=utf-8&oe=utf-8\" target='_blank'><img src=\"/images/home/google.gif\" alt=\"Google\"></a><li>\n");
+		page.append("		</ul>\n");
+		page.append("      </div>\n");
+		page.append("<div class='desc sort-info last-line'>");
+		page.append("   Before going to Amazon, please check the specialty stores staffed by experts first!");
+		page.append("</div>");
+        }
+
+
+	public void getAmazonButton(StringBuilder page, String query) {
+
+		page.append("         <div class='col-md-6'>\n");
+		page.append("            <div class='panel panel-default'>\n");
+		page.append("               <div class='panel-heading'>\n");
+
+
+		page.append("         <div class=\"btn-group\">\n");
+		page.append("   <button type=\"button\" class=\"btn btn-default btn-lg indexpadding disabled\">1</button>\n");
+
+		page.append("            <button type=\"button\" class=\"btn btn-info btn-lg dropdown-toggle\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\">Amazon <span class=\"caret-right\"></span></button>\n");
+		page.append("             <ul class=\"dropdown-menu\" role=\"menu\">\n");
+			
+		page.append("            <li><a href=\"http://www.amazon.com/s/ref=nb_sb_noss_2?url=search-alias%3Daps&field-keywords=" + query + "\" target='_blank'><img src=\"/images/home/amazon.gif\" alt=\"Amazon\"></a><li>\n");
+				
+		page.append("            <li><a href=\"http://www.ebay.com/sch/i.html?_nkw=" + query + "\" target='_blank'><img src=\"/images/home/ebay.jpg\" alt=\"Ebay\"></a><li>\n");
+
+		//page.append("            <li><a href=\"http://www.costco.com/CatalogSearch?storeId=10301&catalogId=10701&langId=-1&refine=&keyword=" + query + "\" target='_blank'><img src=\"/images/home/costco.gif\" alt=\"Costco\"></a><li>\n");
+				
+		//page.append("            <li><a href=\"http://www.walmart.com/search/?query=" + query + "\" target='_blank'><img src=\"/images/home/walmart.gif\" alt=\"Walmart\"></a><li>\n");
+				
+		page.append("                <li role=\"separator\" class=\"divider\"></li>\n"); 
+
+		page.append("            <li><a href=\"http://search.yahoo.com/search/?p=" + query + "\" target='_blank'><img src=\"/images/home/yahoo.gif\" alt=\"Yahoo\"></a><li>\n");
+				
+		page.append("            <li><a href=\"https://www.google.com/search?q=" + query + "&ie=utf-8&oe=utf-8\" target='_blank'><img src=\"/images/home/google.gif\" alt=\"Google\"></a><li>\n");
+		page.append("		</ul>\n");
+		page.append("      </div>\n");
+
+
+
+
+		//if (description != null && description.equals("none") == false) {
+
+                 //  description = description.replaceAll("[;'\"]", "");
+		 //  sb.append("                     <a href=\"http://" + href + "\" data-toggle=\"tooltip\" title='"+description+"' onclick=\"openStore('"+href+"')\" target=\"_blank\" class=\"btn btn-info btn-lg\">"+company+"</a>\n");
+		//}
+		//else {
+                //   context = context.replaceAll("</*b>", "");
+                //   context = context.replaceAll("[;'\"]", "");
+		//   sb.append("                     <a href=\"http://" + href + "\" data-toggle=\"tooltip\" title='"+context+"' onclick=\"openStore('"+href+"')\" target=\"_blank\" class=\"btn btn-info btn-lg\">"+company+"</a>\n");
+		//}
+
+
+		//page.append("                  </div>\n");
+		page.append("               </div>\n");
+		page.append("            </div>\n");
+		page.append("         </div>\n");
+	}
+
+
+
+}
+

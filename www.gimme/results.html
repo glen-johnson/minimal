@@ -1,0 +1,255 @@
+   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+   <meta name="url" content="/">
+   <meta name="csrf-param" content="_csrf">
+   <meta name="csrf-token" content="STFCbmpqNUEjZXZeKV17JwRnI1gbIkUCMXQNBi0gfCwYUjAeCQxcMw==">
+   <meta name="description" content="GimmeUSA Search Results">
+	
+	<link href="css/gimmeusa.min.css" rel="stylesheet">
+   
+   <script src="js/jquery.js"></script>
+	<script src="js/jquery.highlighter.js"></script>
+   <script src="js/bootstrap.min.js"></script>
+	<script src="js/bootbox.min.js"></script>
+	<script src="js/typeahead.min.js"></script>
+	
+	
+	<link rel="apple-touch-icon" sizes="57x57" href="icons/apple-icon-57x57.png">
+	<link rel="apple-touch-icon" sizes="60x60" href="icons/apple-icon-60x60.png">
+	<link rel="apple-touch-icon" sizes="72x72" href="icons/apple-icon-72x72.png">
+	<link rel="apple-touch-icon" sizes="76x76" href="icons/apple-icon-76x76.png">
+	<link rel="apple-touch-icon" sizes="114x114" href="icons/apple-icon-114x114.png">
+	<link rel="apple-touch-icon" sizes="120x120" href="icons/apple-icon-120x120.png">
+	<link rel="apple-touch-icon" sizes="144x144" href="icons/apple-icon-144x144.png">
+	<link rel="apple-touch-icon" sizes="152x152" href="icons/apple-icon-152x152.png">
+	<link rel="apple-touch-icon" sizes="180x180" href="icons/apple-icon-180x180.png">
+	<link rel="apple-touch-icon" sizes="500x500" href="icons/apple-icon-500x500.png">
+	<link rel="icon" type="image/png" sizes="192x192"  href="icons/android-icon-192x192.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="96x96" href="icons/favicon-96x96.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png">
+	<link rel="manifest" href="/manifest.json">
+	<meta name="msapplication-TileColor" content="#ffffff">
+	<meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+	<meta name="theme-color" content="#ffffff">
+		
+
+   </head>
+	<body style="background-color:#E6E6FA">
+		
+      <script>
+         function sendQuery(b) {
+				if(b) {
+					b = b.trim(b);
+					b = b.replace(/[#?=]/g, '');
+					b = b.replace(/\s\s+/g, ' ');
+					var words = b.split(' ');
+					var num_words = words.length;
+					if(num_words > 3) {
+						var re = /^[A-Z]/;
+						var test = re.test(words[words.length - 1]);
+						if(test === false) {
+						   bootbox.alert("Use 3 words or less to describe a product or service! Business owners will probably describe the product using different words.<br><br>Local searches ending with the name of a city or state are excepted from the count if they start with a capital letter. Example: \'honda seat covers Houston\'");
+						   return;
+						}
+					}
+					if(b.length > 3 && b.length < 50) {
+						window.location.href = '/results?query='+b+'&cosmo';
+					}
+					else {
+						bootbox.alert("Please use atleast 4 characters but no more than 50 to capture a good list of businesses!");
+					}
+				}
+         }
+		</script>
+		
+		<script>
+		   $(function() {
+			// constructs the suggestion engine
+			var suggestions = new Bloodhound({
+			   datumTokenizer: Bloodhound.tokenizers.whitespace,
+			   queryTokenizer: Bloodhound.tokenizers.whitespace,
+			   prefetch: {
+				   //url: 'http://localhost:8080/states1.json',
+					url: 'suggestions.json',
+					ttl: 0
+			   }
+			});
+			
+			suggestions.initialize();
+			
+			// the space after bloodhound is REQUIRED
+			$('#bloodhound .typeahead').typeahead({
+            hint: false,
+				highlight: true,
+				minLength: 3,
+				items: 10,
+				},
+				{
+					//source:states.ttAdapter(),
+					name: 'suggestions',
+					source: suggestions
+				});
+		   });
+	   </script>
+
+		
+		<script>
+         function hlaction(b) {
+				$('#hlbutton').prop('disabled', true);
+				// hlbutton.style.fontWeight="normal";
+				$('#results').highlight(b);
+				//callhighlighter();
+         }
+      </script>
+		
+      <script>
+         function ga(href) {
+            var xhttp;
+            if (window.XMLHttpRequest) {
+               xhttp = new XMLHttpRequest();
+            }
+            else {
+               xhttp = new ActiveXObject("Microsoft.XMLHTTP");
+            }
+            if(xhttp) {
+               var visit = 'ga-analytics=' + href;
+               xhttp.open("GET", visit, true);
+               xhttp.send();
+            }
+         }
+      </script>
+		
+		<script>
+			function showLinks(el) {
+				// window.alert(el);
+				$(el).removeClass('btn-default');
+				$(el).addClass('btn-info');
+         };
+      </script>
+		
+		
+
+		
+		<script>
+         $(function() {
+            $('#showDetail').click(function() {
+               $('#buttons').toggle();
+               $('#details').toggle();
+					if ($(this).text() == "Sort A-Z") {
+						$(this).text("Sort 1-10"); 
+					}
+					else {
+						$(this).text("Sort A-Z");
+					}
+            });
+         });
+      </script>
+      
+      <script>
+         $(function() {
+            $(document).on( 'scroll', function() {
+               if ($(window).scrollTop() > 100) {
+                  $('.scroll-top-wrapper').addClass('show');
+               } else {
+                  $('.scroll-top-wrapper').removeClass('show');
+               }
+            });
+            $('.scroll-top-wrapper').on('click', scrollToTop);
+         });
+          
+         function scrollToTop() {
+            verticalOffset = typeof(verticalOffset) != 'undefined' ? verticalOffset : 0;
+            element = $('body');
+            offset = element.offset();
+            offsetTop = offset.top;
+            $('html, body').animate({scrollTop: offsetTop}, 500, 'linear');
+         }
+      </script>
+		
+		<!--
+		document ready script is built in zippy
+		-->
+
+		<div>
+			<a name="top"></a>
+		</div>
+		
+		<div class="container ">
+			<div class="top-links text-center">
+				<a href="/" style="display:inline;">Home </a>
+				&nbsp;&nbsp;&nbsp;
+				<a href="/faq.html" style="display:inline;"> FAQ </a>
+				&nbsp;&nbsp;&nbsp;
+				<a href="/surf.html" style="display:inline;"> Shopping Ideas</a>
+			</div>
+		</div>
+		
+		<div class="col-md-5 col-centered top-buffer">
+			<form id="tfnewsearch">
+				<div id="bloodhound" class="input-group">
+			      <input type="text" class="typeahead form-control" id="tftextinput" name="q" autocomplete="off" autocapitalize="none" placeholder="search stores for...">
+					<span class="input-group-btn">
+						<!--<button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span></button>-->
+						<button type="submit" class="btn btn-primary"><b>Go Shopping<em>!</em></b></button>
+					</span>
+				</div>
+			</form>
+			<div class="tfclear"></div>
+			<script>
+				var a = document.getElementById('tfnewsearch');
+				a.addEventListener('submit',function(e) {
+					e.preventDefault();
+					doQuery();
+				});
+			</script>
+		</div>
+		
+		<div class="container text-center">	
+			
+		   <div class="top-buffer">
+				<div class="slogan">
+					<!--<h4><em>Find your new favorite store right now!</em></h4>-->
+					<h4><em>no ads &nbsp;&#8226;&nbsp; no cookies &nbsp;&#8226;&nbsp; no tracking</em></h4>
+				</div>
+				
+				<div class="top-buffer">
+					<div class="result-block">
+						<h3 class="result-inline gimmeusa">gimme<span class="gimmeusa-red">USA</span>.com</h3>
+						<img src="images/re.png" class="result-inline" alt="GimmeUSA">
+						<!--<img src="/images/gimmeusa_on_map.30.gif" class="img-responsive center-block" alt="GimmeUSA">-->
+					</div>
+				</div>
+				
+
+			</div>
+		</div>
+		
+		<div class="container col-md-6 col-centered">
+			<!--<div class="result-block bottom-medbuffer">-->
+			<div class="btn-group bottom-medbuffer">
+				<!--
+				<button class="btn btn-primary result-inline" type="button" onclick="hlaction()" id="hlbutton"><b>Highlight</b></button>
+				<button id="showDetail" class="btn btn-primary result-inline" type="button"><b>A-Z</b></button>
+			   -->
+				<button class="btn btn-sm btn-primary" type="button" onclick="hlaction()" id="hlbutton">Highlight Query</button>
+				<button id="showDetail" class="btn btn-sm btn-info" type="button">Sort A-Z</button>
+			</div>
+		</div>
+
+
+			__RESULTS__
+
+      
+      <div class="scroll-top-wrapper ">
+         <span class="scroll-top-inner">
+				<span class="glyphicon glyphicon-arrow-up"></span>
+         </span>
+      </div>
+      
+
+		 
+   </body>
+</html> 
+
+
+

@@ -1,0 +1,208 @@
+
+
+<div id='details' class='container top-buffer bottom-buffer'>
+<div class='row'>
+   <div class='col-lg-4 col-md-6 col-sm-6 col-xs-12'>
+      <div class='bottom-buffer'>
+         <div class='results-description background-blue'>
+            <span class='label label-primary'>1</span>
+<a href="http://www.carlsgolfland.com/golf-shoes/shoes-accessories" onclick="ga('http://www.carlsgolfland.com/golf-shoes/shoes-accessories')" target="_blank"><span style="font-size: 14pt;"> CarlsGolfLand.com / Shoes Accessories</span></a><div class='bottom-buffer'></div><div class='row'><div class='col-sm-6 col-sm-offset-1 bottom-buffer'><a href='http://carlsgolfland.com' onclick="ga('carlsgolfland.com')" target='_blank'><img class='img-responsive' src='sc/s10/c13/c46UHylU0U4vD.jpg' width='302' height='302'></a></div><div class='col-sm-5 description-font'><h3 class='top-nomargin'>Carls Golf Land</h3><hr class='separator-hr'>Keep Your Golf Shoes Looking New with Shoe Accessories. Largest Selection + Lower Prices at Carl's Golfland! Shop Now</div></div><br>
+         </div>
+      </div>
+   </div>
+   <div class='col-lg-4 col-md-6 col-sm-6 col-xs-12'>
+      <div class='bottom-buffer'>
+         <div class='results-description background-blue'>
+            <span class='label label-primary'>2</span>
+<a href="http://www.veterinaryapparel.com/Shoes-Tennis-Shoes" onclick="ga('http://www.veterinaryapparel.com/Shoes-Tennis-Shoes')" target="_blank"><span style="font-size: 14pt;"> VeterinaryApparel.com / Tennis Shoes</span></a><div class='bottom-buffer'></div><div class='row'><div class='col-sm-6 col-sm-offset-1 bottom-buffer'><a href='http://veterinaryapparel.com' onclick="ga('veterinaryapparel.com')" target='_blank'><img class='img-responsive' src='sc/s16/v17/Opap6Wv46z4FF46pU.jpg' width='302' height='302'></a></div><div class='col-sm-5 description-font'><h3 class='top-nomargin'>Veterinary Apparel</h3><hr class='separator-hr'>Tennis Shoes for Work from Veterinary Apparel Company provide you with all day comfort for veterinary professionals that spend most of the day on their feet. We...</div></div><br>
+         </div>
+      </div>
+   </div>
+   <div class='col-lg-4 col-md-6 col-sm-6 col-xs-12'>
+      <div class='bottom-buffer'>
+         <div class='results-description background-blue'>
+            <span class='label label-primary'>3</span>
+<a href="http://www.garnethill.com/shoes-accessories/shoes-boots/" onclick="ga('http://www.garnethill.com/shoes-accessories/shoes-boots/')" target="_blank"><span style="font-size: 14pt;"> GarnetHill.com / Shoes & Boots</span></a><div class='bottom-buffer'></div><div class='row'><div class='col-sm-6 col-sm-offset-1 bottom-buffer'><a href='http://garnethill.com' onclick="ga('garnethill.com')" target='_blank'><img class='img-responsive' src='sc/s6/g10/y46vpa3WUU.jpg' width='302' height='302'></a></div><div class='col-sm-5 description-font'><h3 class='top-nomargin'>Garnet Hill</h3><hr class='separator-hr'>Buy dressy and casual women's shoes at Garnet Hill. Find boots, ballet flats, and more from popular women's shoe brands: Eileen Fisher, Gentle Souls, ...</div></div><br>
+         </div>
+      </div>
+   </div>
+   <div class='col-lg-4 col-md-6 col-sm-6 col-xs-12'>
+      <div class='bottom-buffer'>
+         <div class='results-description background-blue'>
+            <span class='label label-primary'>4</span>
+<a href="http://www.superdry.com/womens/shoes" onclick="ga('http://www.superdry.com/womens/shoes')" target="_blank"><span style="font-size: 14pt;"> superdry.com / Shoes</span></a><div class='bottom-buffer'></div><div class='description-font'>Shop our collection of stylish womens shoes, for day and night - including shoes, trainers, boots and more. Find your perfect pair with free delivery</div><br>
+         </div>
+      </div>
+   </div>
+   <div class='col-lg-4 col-md-6 col-sm-6 col-xs-12'>
+      <div class='bottom-buffer'>
+         <div class='results-description background-blue'>
+            <span class='label label-primary'>5</span>
+<a href="http://nextadventure.net/shop/womens/footwear" onclick="ga('http://nextadventure.net/shop/womens/footwear')" target="_blank"><span style="font-size: 14pt;"> NextAdventure.net / Footwear</span></a><div class='bottom-buffer'></div><div class='description-font'>Free Shipping on orders over $50. Expert advice, the best prices, and a great selection of hiking boots, hiking shoes, casual shoes, and sandals</div><br>
+         </div>
+      </div>
+   </div>
+   <div class='col-lg-4 col-md-6 col-sm-6 col-xs-12'>
+      <div class='bottom-buffer'>
+         <div class='results-description background-blue'>
+            <span class='label label-primary'>6</span>
+<a href="http://www.diamondback.com/shop/shoes" onclick="ga('http://www.diamondback.com/shop/shoes')" target="_blank"><span style="font-size: 14pt;"> Diamondback.com / Shoes</span></a><div class='bottom-buffer'></div><div class='row'><div class='col-sm-6 col-sm-offset-1 bottom-buffer'><a href='http://diamondback.com' onclick="ga('diamondback.com')" target='_blank'><img class='img-responsive' src='sc/s17/d11/DW4glvDE4cr.jpg' width='302' height='302'></a></div><div class='col-sm-5 description-font'><h3 class='top-nomargin'>Diamondback</h3><hr class='separator-hr'>You want shoes to fit snugly but still be able to accommodate puffy feet at the end of a long ride. Diamondback shoes look and perform great, but weve put fit above...</div></div><br>
+         </div>
+      </div>
+   </div>
+   <div class='col-lg-4 col-md-6 col-sm-6 col-xs-12'>
+      <div class='bottom-buffer'>
+         <div class='results-description background-blue'>
+            <span class='label label-primary'>7</span>
+<a href="http://www.zootsports.com/womens/shoes" onclick="ga('http://www.zootsports.com/womens/shoes')" target="_blank"><span style="font-size: 14pt;"> ZootSports.com / Shoes</span></a><div class='bottom-buffer'></div><div class='row'><div class='col-sm-6 col-sm-offset-1 bottom-buffer'><a href='http://zootsports.com' onclick="ga('zootsports.com')" target='_blank'><img class='img-responsive' src='sc/s16/z10/dllaHFl6aH.jpg' width='302' height='302'></a></div><div class='col-sm-5 description-font'><h3 class='top-nomargin'>Zoot Sports</h3><hr class='separator-hr'>Zoot specializes in building women specific performance training and racing running shoes</div></div><br>
+         </div>
+      </div>
+   </div>
+   <div class='col-lg-4 col-md-6 col-sm-6 col-xs-12'>
+      <div class='bottom-buffer'>
+         <div class='results-description background-blue'>
+            <span class='label label-primary'>8</span>
+<a href="https://www.cricketstoreonline.com/shoes-1/" onclick="ga('https://www.cricketstoreonline.com/shoes-1/')" target="_blank"><span style="font-size: 14pt;"> CricketStoreOnLine.com / Shoes</span></a><div class='bottom-buffer'></div><div class='row'><div class='col-sm-6 col-sm-offset-1 bottom-buffer'><a href='http://cricketstoreonline.com' onclick="ga('cricketstoreonline.com')" target='_blank'><img class='img-responsive' src='sc/s17/c18/c6WcrpaHal6plvUWvp.jpg' width='302' height='302'></a></div><div class='col-sm-5 description-font'><h3 class='top-nomargin'>Cricket Store On Line</h3><hr class='separator-hr'>Youth cricket shoes available now from cricket store online from size 1 to 6</div></div><br>
+         </div>
+      </div>
+   </div>
+   <div class='col-lg-4 col-md-6 col-sm-6 col-xs-12'>
+      <div class='bottom-buffer'>
+         <div class='results-description background-blue'>
+            <span class='label label-primary'>9</span>
+<a href="https://www.marcjacobs.com/men/shoes/" onclick="ga('https://www.marcjacobs.com/men/shoes/')" target="_blank"><span style="font-size: 14pt;"> MarcJacobs.com / Shoes</span></a><div class='bottom-buffer'></div><div class='row'><div class='col-sm-6 col-sm-offset-1 bottom-buffer'><a href='http://marcjacobs.com' onclick="ga('marcjacobs.com')" target='_blank'><img class='img-responsive' src='sc/s14/m10/g46cb4clEH.jpg' width='302' height='302'></a></div><div class='col-sm-5 description-font'><h3 class='top-nomargin'>Marc Jacobs</h3><hr class='separator-hr'>A proper shoe collection will ensure that you look good in any situation. Browse Marc Jacobs mens shoes to find comfortable sandals, boots, sneakers, and more</div></div><br>
+         </div>
+      </div>
+   </div>
+   <div class='col-lg-4 col-md-6 col-sm-6 col-xs-12'>
+      <div class='bottom-buffer'>
+         <div class='results-description background-blue'>
+            <span class='label label-primary'>10</span>
+<a href="http://www.hansensurf.com/collections/footwear" onclick="ga('http://www.hansensurf.com/collections/footwear')" target="_blank"><span style="font-size: 14pt;"> HansensURF.com / Footwear</span></a><div class='bottom-buffer'></div><div class='row'><div class='col-sm-6 col-sm-offset-1 bottom-buffer'><a href='http://hansensurf.com' onclick="ga('hansensurf.com')" target='_blank'><img class='img-responsive' src='sc/s2/h10/34vHpvHs60.jpg' width='302' height='302'></a></div><div class='col-sm-5 description-font'><h3 class='top-nomargin'>Hansens URF</h3><hr class='separator-hr'>Hansen Surfboards offers the latest in mens, womens and kids surf shoes and sandals. We carry Cobian, Reef, Olukai, Sanuk, Rainbow and much more. Shop now</div></div><br>
+         </div>
+      </div>
+   </div>
+   <div class='col-lg-4 col-md-6 col-sm-6 col-xs-12'>
+      <div class='bottom-buffer'>
+         <div class='results-description background-blue'>
+            <span class='label label-primary'>11</span>
+<a href="http://www.rockymountaintrail.com/outdoor/Mens_Clothing/Mens_Shoes_and_Footwear/Mens_Athletic_Shoes/" onclick="ga('http://www.rockymountaintrail.com/outdoor/Mens_Clothing/Mens_Shoes_and_Footwear/Mens_Athletic_Shoes/')" target="_blank"><span style="font-size: 14pt;"> RockyMountainTrail.com / Mens Athletic Shoes</span></a><div class='bottom-buffer'></div><div class='row'><div class='col-sm-6 col-sm-offset-1 bottom-buffer'><a href='http://rockymountaintrail.com' onclick="ga('rockymountaintrail.com')" target='_blank'><img class='img-responsive' src='sc/s7/r18/6lcrzglsva4Wva64WU.jpg' width='302' height='302'></a></div><div class='col-sm-5 description-font'><h3 class='top-nomargin'>Rocky Mountain Trail</h3><hr class='separator-hr'>Shop mens athletic shoes now. With flexible soles and outstanding grip for fast pursuits youll never want to stop. Top Brands. Fast, Free Shipping</div></div><br>
+         </div>
+      </div>
+   </div>
+   <div class='col-lg-4 col-md-6 col-sm-6 col-xs-12'>
+      <div class='bottom-buffer'>
+         <div class='results-description background-blue'>
+            <span class='label label-primary'>12</span>
+<a href="http://www.froggtoggs.com/wading-shoes-boots-footwear/wading-shoes.html" onclick="ga('http://www.froggtoggs.com/wading-shoes-boots-footwear/wading-shoes.html')" target="_blank"><span style="font-size: 14pt;"> FrogGtoggs.com / Wading Shoes</span></a><div class='bottom-buffer'></div><div class='row'><div class='col-sm-6 col-sm-offset-1 bottom-buffer'><a href='http://froggtoggs.com' onclick="ga('froggtoggs.com')" target='_blank'><img class='img-responsive' src='sc/s5/f10/06lyyalyyH.jpg' width='302' height='302'></a></div><div class='col-sm-5 description-font'><h3 class='top-nomargin'>Frog Gtoggs</h3><hr class='separator-hr'>Frogg toggs line of wading shoes are built with quality and care so you can be assured of a great fit and performance when in the field</div></div><br>
+         </div>
+      </div>
+   </div>
+   <div class='col-lg-4 col-md-6 col-sm-6 col-xs-12'>
+      <div class='bottom-buffer'>
+         <div class='results-description background-blue'>
+            <span class='label label-primary'>13</span>
+<a href="https://www.copsplus.com/footwear.php" onclick="ga('https://www.copsplus.com/footwear.php')" target="_blank"><span style="font-size: 14pt;"> CopsPlus.com / Footwear</span></a><div class='bottom-buffer'></div><div class='row'><div class='col-sm-6 col-sm-offset-1 bottom-buffer'><a href='http://copsplus.com' onclick="ga('copsplus.com')" target='_blank'><img class='img-responsive' src='sc/s18/c8/clFHFUsH.jpg' width='302' height='302'></a></div><div class='col-sm-5 description-font'><h3 class='top-nomargin'>Cops Plus</h3><hr class='separator-hr'>Shop for Footwear by top brands: Original SWAT Footwear, 511 Tactical Footwear, Under Armour Footwear, Blackhawk WarriorWear Footwear, Tru-Spec Footwear and much...</div></div><br>
+         </div>
+      </div>
+   </div>
+   <div class='col-lg-4 col-md-6 col-sm-6 col-xs-12'>
+      <div class='bottom-buffer'>
+         <div class='results-description background-blue'>
+            <span class='label label-primary'>14</span>
+<a href="http://www.essentialapparel.com/c/mens-shoes" onclick="ga('http://www.essentialapparel.com/c/mens-shoes')" target="_blank"><span style="font-size: 14pt;"> EssentialApparel.com / Shoes</span></a><div class='bottom-buffer'></div><div class='row'><div class='col-sm-6 col-sm-offset-1 bottom-buffer'><a href='http://essentialapparel.com' onclick="ga('essentialapparel.com')" target='_blank'><img class='img-responsive' src='sc/s19/e16/pHHpvaW4U4FF46pU.jpg' width='302' height='302'></a></div><div class='col-sm-5 description-font'><h3 class='top-nomargin'>Essential Apparel</h3><hr class='separator-hr'>Shop for Mens Shoes products at EssentialApparel.com</div></div><br>
+         </div>
+      </div>
+   </div>
+   <div class='col-lg-4 col-md-6 col-sm-6 col-xs-12'>
+      <div class='bottom-buffer'>
+         <div class='results-description background-blue'>
+            <span class='label label-primary'>15</span>
+<a href="http://www.dobell.com/mens/formalwear/tuxedo-shoes/" onclick="ga('http://www.dobell.com/mens/formalwear/tuxedo-shoes/')" target="_blank"><span style="font-size: 14pt;"> dobell.com / Tuxedo Shoes</span></a><div class='bottom-buffer'></div><div class='row'><div class='col-sm-6 col-sm-offset-1 bottom-buffer'><a href='http://dobell.com' onclick="ga('dobell.com')" target='_blank'><img class='img-responsive' src='sc/s15/d6/DlEpUU.jpg' width='302' height='302'></a></div><div class='col-sm-5 description-font'><h3 class='top-nomargin'>dobell</h3><hr class='separator-hr'>Choose from our extensive range of mens tuxedo shoes including mens wedding and tuxedo shoes all online with more than 50% discounts off retail. Get your tuxedo...</div></div><br>
+         </div>
+      </div>
+   </div>
+   <div class='col-lg-4 col-md-6 col-sm-6 col-xs-12'>
+      <div class='bottom-buffer'>
+         <div class='results-description background-blue'>
+            <span class='label label-primary'>16</span>
+<a href="https://www.olukai.com/womens/shoes.html" onclick="ga('https://www.olukai.com/womens/shoes.html')" target="_blank"><span style="font-size: 14pt;"> olukai.com / Shoes</span></a><div class='bottom-buffer'></div><div class='row'><div class='col-sm-6 col-sm-offset-1 bottom-buffer'><a href='http://olukai.com' onclick="ga('olukai.com')" target='_blank'><img class='img-responsive' src='sc/s7/o6/lUsr4W.jpg' width='302' height='302'></a></div><div class='col-sm-5 description-font'><h3 class='top-nomargin'>olukai</h3><hr class='separator-hr'>Hawaiian inspired women's quality beach water shoes. Footwear with style, comfort, and craftsmanship. We believe everybody can live aloha</div></div><br>
+         </div>
+      </div>
+   </div>
+   <div class='col-lg-4 col-md-6 col-sm-6 col-xs-12'>
+      <div class='bottom-buffer'>
+         <div class='results-description background-blue'>
+            <span class='label label-primary'>17</span>
+<a href="http://www.rockport.com/rockport/mens-boat-shoes" onclick="ga('http://www.rockport.com/rockport/mens-boat-shoes')" target="_blank"><span style="font-size: 14pt;"> Rockport.com / Boat Shoes</span></a><div class='bottom-buffer'></div><div class='row'><div class='col-sm-6 col-sm-offset-1 bottom-buffer'><a href='http://rockport.com' onclick="ga('rockport.com')" target='_blank'><img class='img-responsive' src='sc/s16/r8/6lcrFl6a.jpg' width='302' height='302'></a></div><div class='col-sm-5 description-font'><h3 class='top-nomargin'>Rockport</h3><hr class='separator-hr'>Shop Rockport for comfortable men's suede and leather boat shoes. Choose from a variety of colors and styles of men's deck shoes. Rockport</div></div><br>
+         </div>
+      </div>
+   </div>
+   <div class='col-lg-4 col-md-6 col-sm-6 col-xs-12'>
+      <div class='bottom-buffer'>
+         <div class='results-description background-blue'>
+            <span class='label label-primary'>18</span>
+<a href="https://www.orthoticshop.com/mens-popular-diabetic-shoes/" onclick="ga('https://www.orthoticshop.com/mens-popular-diabetic-shoes/')" target="_blank"><span style="font-size: 14pt;"> OrthOticShop.com / Diabetic Shoes</span></a><div class='bottom-buffer'></div><div class='row'><div class='col-sm-6 col-sm-offset-1 bottom-buffer'><a href='http://orthoticshop.com' onclick="ga('orthoticshop.com')" target='_blank'><img class='img-responsive' src='sc/s0/o12/l6a3laWcH3lF.jpg' width='302' height='302'></a></div><div class='col-sm-5 description-font'><h3 class='top-nomargin'>Orth Otic Shop</h3><hr class='separator-hr'>Shop our wide selection of popular men's diabetic shoes. Orthotic Shop offers footwear and sandals for diabetic feet to relieve stress and foot pain</div></div><br>
+         </div>
+      </div>
+   </div>
+   <div class='col-lg-4 col-md-6 col-sm-6 col-xs-12'>
+      <div class='bottom-buffer'>
+         <div class='results-description background-blue'>
+            <span class='label label-primary'>19</span>
+<a href="http://www.badmintonavenue.com/Badminton-Shoes-s/1.htm" onclick="ga('http://www.badmintonavenue.com/Badminton-Shoes-s/1.htm')" target="_blank"><span style="font-size: 14pt;"> BadmintonAvenue.com / Shoes</span></a><div class='bottom-buffer'></div><div class='row'><div class='col-sm-6 col-sm-offset-1 bottom-buffer'><a href='http://badmintonavenue.com' onclick="ga('badmintonavenue.com')" target='_blank'><img class='img-responsive' src='sc/s12/b15/E4DgWvalv4Opvsp.jpg' width='302' height='302'></a></div><div class='col-sm-5 description-font'><h3 class='top-nomargin'>Badminton Avenue</h3><hr class='separator-hr'>Badminton Avenue has the largest selection of Badminton Shoes in the US! We carry Yonex, Victor, Adidas and Pro-Tech Badminton shoes in a large variety of sizes....</div></div><br>
+         </div>
+      </div>
+   </div>
+   <div class='col-lg-4 col-md-6 col-sm-6 col-xs-12'>
+      <div class='bottom-buffer'>
+         <div class='results-description background-blue'>
+            <span class='label label-primary'>20</span>
+<a href="http://www.zumiez.com/outlet/shoes.html" onclick="ga('http://www.zumiez.com/outlet/shoes.html')" target="_blank"><span style="font-size: 14pt;"> zumiez.com / Outlet Shoes</span></a><div class='bottom-buffer'></div><div class='row'><div class='col-sm-6 col-sm-offset-1 bottom-buffer'><a href='http://zumiez.com' onclick="ga('zumiez.com')" target='_blank'><img class='img-responsive' src='sc/s11/z6/dsgWpd.jpg' width='302' height='302'></a></div><div class='col-sm-5 description-font'><h3 class='top-nomargin'>zumiez</h3><hr class='separator-hr'>Shop discount shoes prices in the Zumiez Outlet store, carrying a huge selection of discounted shoes at outlet and clearance prices from brands like Osiris, Vans...</div></div><br>
+         </div>
+      </div>
+   </div>
+   <div class='col-lg-4 col-md-6 col-sm-6 col-xs-12'>
+      <div class='bottom-buffer'>
+         <div class='results-description background-blue'>
+            <span class='label label-primary'>21</span>
+<a href="http://www.backcountry.com/boys-boots-shoes?fl=true" onclick="ga('http://www.backcountry.com/boys-boots-shoes?fl=true')" target="_blank"><span style="font-size: 14pt;"> BackCountry.com / Footwear</span></a><div class='bottom-buffer'></div><div class='row'><div class='col-sm-6 col-sm-offset-1 bottom-buffer'><a href='http://backcountry.com' onclick="ga('backcountry.com')" target='_blank'><img class='img-responsive' src='sc/s9/b11/E4crclsva6z.jpg' width='302' height='302'></a></div><div class='col-sm-5 description-font'><h3 class='top-nomargin'>Back Country</h3><hr class='separator-hr'>FREE Shipping on orders over $50. Shop boys' boots, shoes, sandals, and more, including shoes for water and rock climbing by brands like DC, KEEN, SmartWool...</div></div><br>
+         </div>
+      </div>
+   </div>
+   <div class='col-lg-4 col-md-6 col-sm-6 col-xs-12'>
+      <div class='bottom-buffer'>
+         <div class='results-description background-blue'>
+            <span class='label label-primary'>22</span>
+<a href="http://www.tuxedosdirect.com/transit-tuxedo-shoes" onclick="ga('http://www.tuxedosdirect.com/transit-tuxedo-shoes')" target="_blank"><span style="font-size: 14pt;"> TuxedosDirect.com / Transit Tuxedo Shoes</span></a><div class='bottom-buffer'></div><div class='row'><div class='col-sm-6 col-sm-offset-1 bottom-buffer'><a href='http://tuxedosdirect.com' onclick="ga('tuxedosdirect.com')" target='_blank'><img class='img-responsive' src='sc/s16/t13/as2pDlHDW6pca.jpg' width='302' height='302'></a></div><div class='col-sm-5 description-font'><h3 class='top-nomargin'>Tuxedos Direct</h3><hr class='separator-hr'>Transit Tuxedo Shoes - These stylish slip on loafers have a dapper satin ribbon across the top and a high shine formal look</div></div><br>
+         </div>
+      </div>
+   </div>
+   <div class='col-lg-4 col-md-6 col-sm-6 col-xs-12'>
+      <div class='bottom-buffer'>
+         <div class='results-description background-blue'>
+            <span class='label label-primary'>23</span>
+<a href="http://www.weplaysports.com/wrestling/shoes/" onclick="ga('http://www.weplaysports.com/wrestling/shoes/')" target="_blank"><span style="font-size: 14pt;"> WePlaySports.com / Wrestling Shoes</span></a><div class='bottom-buffer'></div><div class='row'><div class='col-sm-6 col-sm-offset-1 bottom-buffer'><a href='http://weplaysports.com' onclick="ga('weplaysports.com')" target='_blank'><img class='img-responsive' src='sc/s14/w12/1pFU4zHFl6aH.jpg' width='302' height='302'></a></div><div class='col-sm-5 description-font'><h3 class='top-nomargin'>We Play Sports</h3><hr class='separator-hr'>Shop for the best cool new Adidas & Asics wrestling shoes for men and boys</div></div><br>
+         </div>
+      </div>
+   </div>
+   <div class='col-lg-4 col-md-6 col-sm-6 col-xs-12'>
+      <div class='bottom-buffer'>
+         <div class='results-description background-blue'>
+            <span class='label label-primary'>24</span>
+<a href="http://www.waterskis.com/Shoes-s/2518.htm" onclick="ga('http://www.waterskis.com/Shoes-s/2518.htm')" target="_blank"><span style="font-size: 14pt;"> WatersKIS.com / Sanuk Shoes</span></a><div class='bottom-buffer'></div><div class='row'><div class='col-sm-6 col-sm-offset-1 bottom-buffer'><a href='http://waterskis.com' onclick="ga('waterskis.com')" target='_blank'><img class='img-responsive' src='sc/s10/w9/14ap6HrWH.jpg' width='302' height='302'></a></div><div class='col-sm-5 description-font'><h3 class='top-nomargin'>Waters KIS</h3><hr class='separator-hr'>Save on Sanuk Shoes with Free Ground Shipping on orders over $99 from WaterSkis.com</div></div><br>
+         </div>
+      </div>
+   </div>
+   <div class='col-lg-4 col-md-6 col-sm-6 col-xs-12'>
+      <div class='bottom-buffer'>
+         <div class='results-description background-blue'>
+            <span class='label label-primary'>25</span>
+<a href="http://www.anglerscenter.com/gifts-clothing/mens-clothing/footwear/" onclick="ga('http://www.anglerscenter.com/gifts-clothing/mens-clothing/footwear/')" target="_blank"><span style="font-size: 14pt;"> AnglersCenter.com / Footwear</span></a><div class='bottom-buffer'></div><div class='row'><div class='col-sm-6 col-sm-offset-1 bottom-buffer'><a href='http://anglerscenter.com' onclick="ga('anglerscenter.com')" target='_blank'><img class='img-responsive' src='sc/s14/a13/4vyUp6Hcpvap6.jpg' width='302' height='302'></a></div><div class='col-sm-5 description-font'><h3 class='top-nomargin'>Anglers Center</h3><hr class='separator-hr'>Men's Boat Shoes, Deck Sandals and boots designed for use on the deck and harsh saltwater environment</div></div><br>
+         </div>
+      </div>
+   </div>
+   </div>
+
+</div> <!--id=details-->
+

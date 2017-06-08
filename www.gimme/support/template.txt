@@ -1,0 +1,74 @@
+
+var tm = null;
+function doTimes()
+		{
+    		var d = new Date();
+
+    		if (tm == null) {
+    			tm = d.getTime();
+    			return 0;
+        	}
+    		else
+    		{
+				tc = d.getTime() - tm;
+				tm = null;
+        		return tc;
+        	}
+ }
+ 
+ function doCapture(answer,id, fun, checker) {
+ 
+     if (typeof checker != 'undefined') {
+     	if (!checker())
+     		return;
+     }
+     	
+     value = doTimes();
+     if (value != 0) {
+     	if (value < 500) {
+     		tm = null;
+     		return;
+     	}
+     	tm = null;
+     }
+     
+	 var  msg = {};
+	  msg.id = id;
+	  msg.answer = answer;
+	
+        $.ajax({
+         type: 'POST',
+         url:'captureQuery',
+         data: JSON.stringify(msg),
+         dataType: 'json',
+         success: function(data, textStatus, request){
+           if (request.status == 204) {
+            text = "";
+            return;
+           } 
+            text = request.responseText;
+            data = JSON.parse(text);
+            message = data.message;
+            text = JSON.stringify(data,null,2);
+            console.log("-----------------");
+            console.log(text);
+            var e = document.getElementById('capture-msg');
+            if (data.error) {
+            	window.location.href='dead.html';
+
+            } else {
+           		 if (data.status == true) {
+           		 	e.innerHTML="<br><em>Thank you! We will be in touch shortly.</em>";
+            		fun();
+           		 } else {
+           		 	e.innerHTML="Try again...";
+            		
+          	  }
+          	}
+            
+         },
+         error: function (request, textStatus, errorThrown) {
+           doModal(BootstrapDialog.TYPE_INFO,"Error",request.responseText);
+         }});
+    ////////////////////
+ }

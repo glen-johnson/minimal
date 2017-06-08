@@ -1,0 +1,31 @@
+User-agent: *
+Disallow: /capture
+Disallow: /css
+Disallow: /fonts
+Disallow: /icons
+Disallow: /img
+Disallow: /bin
+Disallow: /build
+Disallow: /libs
+Disallow: /src
+Disallow: /venues
+Disallow: /images
+Disallow: /js
+Disallow: /support
+
+User-agent: Twitterbot
+Disallow:
+
+User-agent: Baiduspider
+Disallow: *
+
+User-agent: Yandex
+Disallow: *
+
+User-agent: MJ12bot
+Disallow: *
+
+User-agent: Mail.RU_Bot
+Disallow: *
+
+

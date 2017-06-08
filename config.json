@@ -1,0 +1,16 @@
+# copy to /home/gimme/
+{
+	"port": 8080,
+	"search": {
+		"host": "localhost",
+		"port": 8983
+	},
+	"cache": {
+		"maxkeys": 10000,
+		"maxage":  12
+	},
+	"results1": "www/results1.html",
+	"results2": "www/results2.html",
+	"results3": "www/results3.html",
+	"results4": "www/results4.html"
+}

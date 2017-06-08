@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <meta charset="UTF-8">
+    <meta content=
+    "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+    name="viewport">
+    <meta content="/" name="url">
+    <meta content="_csrf" name="csrf-param">
+    <meta content="ajV2Mlh2aFozAxF5HRUkDAlAAGVhOhE0PAUQfQgxDAMnBTdoPhwCLg=="
+    name="csrf-token">
+    <title>Capture Test</title>
+    <script src="js/jquery.js"></script>
+    <script src="js/bootstrap.min.js"> 
+    <script src="js/capture.js"></script>
+</head>
+
+<script>
+function youWin() {
+	alert("You Da Wiinnah!");
+}
+</script>
+
+<body class="">
+					<% "" + core.emitCapture(session, 6, 2, 'youWin'); %>
+</body>
+
+</html>

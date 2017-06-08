@@ -1,0 +1,46 @@
+package com.jacamars.minimal.response;
+
+import java.util.HashSet;
+import java.util.List;
+
+public class Query {
+	public int numFound;
+	public int start = 0;
+	public List<Document> docs;
+	
+	HashSet phones = new HashSet();
+	HashSet descriptions = new HashSet();
+	HashSet highlights = new HashSet();
+
+	public Query() {
+
+	}
+
+	public void toHtml(StringBuilder sb, Highlighting highlighting) {
+		int index = 1;
+		sb.append("<div class='search-result clearfix'>");
+		for (Document doc : docs) {
+		
+		//Document doc = docs.get(1);
+			
+			Field f = highlighting.get(doc.id);
+			String sign = f.getSignature().toString();
+			if ((phones.contains(doc.phone))==false &&
+					descriptions.contains(doc.description)==false && 
+						highlights.contains(sign)==false) {
+				doc.toHtml(sb, index++);
+				f.toHtml(sb);
+				phones.add(doc.phone);
+				if (doc.description.equals("none")==false && doc.description.length() != 0)
+					descriptions.add(doc.description);
+				highlights.add(sign);
+				
+				if (index > 300) 
+					break;
+			}
+		}
+		sb.append("</div>");
+		
+	//	System.out.println("\n"+ sb.toString() + "\n");
+	}
+}

@@ -1,0 +1,345 @@
+#!/usr/bin/perl
+
+# run this on solr machine as a daemon
+# reads /home/gimme/gimme.log every hour, parses and saves as
+# workspace/Minimal/www/support/love-log.html
+
+# THIS VERSION ONLY PRINTS STORE AND QUERY WITH A TIMESTAMP
+
+use strict;
+use warnings;
+use File::Slurp;
+use Sys::Hostname;
+
+my $DELAY_TIME  = 60; # how often to make a report
+my $DEBUG_RECORD = 0;
+
+
+my $OUTPUT_FILENAME = '/home/gimme/www/support/love-log.html';
+my $GIMME_FILENAME  = '/home/gimme/gimme.log';
+
+if(hostname eq 'index0') {
+   $GIMME_FILENAME  = '/home/glen/gimme.log';
+   $OUTPUT_FILENAME = '/home/glen/workspace/Minimal/www/support/love-log.html';
+}
+
+if(! -e $GIMME_FILENAME) {
+   print "FATAL: $GIMME_FILENAME does not exist\n";
+   exit(0);
+}
+
+# Jan 1, 2016 was a Friday;
+my @dows          = qw(Fri Sat Sun Mon Tue Wed Thu);
+my @dpm          = (31,29,31,30,31,30,31,31,30,31,30,31);
+my $num_dow      = 7;
+my $NUM_LINES    = 0;
+my @RECORD       = ();
+my %UNIQUE_USERS = ();
+my %UNIQUE_BOTS  = ();
+
+my $SUCCESS = 0;
+my $FAILURE = -1;
+
+
+sub main;
+sub get_lines;
+sub create_html_file;
+sub get_timestamp(@);
+sub get_came_from(@);
+sub test_time;
+
+#test_time;
+#exit(0);
+
+
+
+main;
+
+sub main
+{
+
+   while(1) {
+      create_html_file;
+      sleep($DELAY_TIME);
+   }
+}
+
+sub create_html_file
+{
+   my $hostname = hostname;
+   
+   my $lines = get_lines;
+   return if(not defined($lines) or @$lines == 0);
+   
+   my @doc = ();
+   push @doc, "<!doctype html>\n";
+   push @doc, "<html lang=\"en\">\n";
+   push @doc, "<head>\n";
+   push @doc, "   <meta charset=\"utf-8\">\n";
+   push @doc, "   <title>StoresILove Users</title>\n";
+   push @doc, "</head>\n";
+   
+   push @doc, "<body>\n";
+   
+   my $time = localtime;
+   my $num_new_lines = @$lines;
+   # print "NEW LINES: num_new_lines\n";
+   
+   push @doc, "$time<br>\n";
+   push @doc, "LOG SERVER: $hostname<br>\n";
+   push @doc, "VERSION 3.0<br>\n";
+   push @doc, "NUM NEW LINES: $num_new_lines<br>\n";
+   push @doc, "STORE entries are users that did a search and clicked one of the results.<br>\n";
+   push @doc, "UNIQUE USERS are just that.<br>\n";
+   push @doc, "QUERY is what a user entered into the search bar.<br>\n";
+   push @doc, "<br>\n";
+
+   
+   my $timestamp       = q{};
+   my $came_from       = q{};
+   my $current_ip      = 00.00.00.00;
+   my $num_new_records = 0;
+   my $doy             = 0;
+   my %records         = ();
+
+
+   foreach my $line (@$lines) {
+      chomp($line);
+      $line =~ s/\s+$//;
+      $line =~ s/^\s+//;
+      
+      # time stamp
+      if($line =~ m/^TS:/) {
+         my ($timestamp_stuff, $doy_stuff) = get_timestamp($line);
+         
+         if(defined($timestamp_stuff) and $timestamp_stuff =~ m/\d/) {
+            $timestamp = $timestamp_stuff;
+            
+            if(defined($doy_stuff) and $doy_stuff =~ m/\d/) {
+               $doy = $doy_stuff;
+            }
+         }
+         next;
+      }
+
+      
+      if($line =~ m/^RR:/) {
+         $came_from = q{};
+         my $stuff = get_came_from($line);
+         if(defined($stuff) and $stuff =~ m/\w/) {
+            $came_from = $stuff;
+         }
+         next;
+      }
+
+      
+      if($line =~ m/^(?:QY|QUERY):\s*/) {
+         my $stuff = $';
+         next if($timestamp !~ m/\d/);
+         $stuff =~ s/\++/ /g;
+         $stuff =~ s/%22//g;
+         $stuff =~ s/%27/'/g;
+         $stuff =~ s/%26/&/g;
+         next if($stuff =~ m/^shoes$|^chairs$/);
+         my $buffer = $current_ip;
+         my $num_spaces = 15 - length($current_ip);
+         for (my $i=0;$i<=$num_spaces;$i++) {
+            $buffer .= '&nbsp;';
+         }
+         my $record = sprintf("%s: %s QUERY: %s", $timestamp, $buffer, $stuff);
+         if($came_from =~ m/\w/) {
+            $record .= " FROM $came_from";
+         }
+         if($DEBUG_RECORD) {
+            print "$record\n";
+         }
+         push(@{$records{$doy}}, "$record<br>\n");
+         ++$num_new_records;
+         next;
+      }
+
+      if($line =~ m/^STORE:\s*/) {
+         my $stuff = $';
+         next if($timestamp !~ m/\d/);
+         $stuff =~ s/^https*:\/\///;
+         $stuff =~ s/^www\.//;
+         if(length($stuff) > 50) {
+            $stuff = substr($stuff, 0, 50);
+            $stuff .= '...';
+         }
+         my $buffer = $current_ip;
+         my $num_spaces = 15 - length($current_ip);
+         for (my $i=0;$i<=$num_spaces;$i++) {
+            $buffer .= '&nbsp;';
+         }
+         my $record = sprintf("%s: %s STORE: %s", $timestamp, $buffer, $stuff);
+         if($came_from =~ m/\w/) {
+            $record .= " FROM $came_from";
+         }
+         if($DEBUG_RECORD) {
+            print "$record\n";
+         }
+         push(@{$records{$doy}}, "$record<br>\n");
+         ++$num_new_records;
+         next;
+      }
+      
+      if($line =~ m/^IP:\s*/) {
+         my $stuff = $';
+         $current_ip = q{};
+         if($stuff =~ m/\d/) {
+            ++$UNIQUE_USERS{$stuff};
+            $current_ip = $stuff;
+         }
+         next;
+      }
+      
+            
+      if($line =~ m/^[NB]OT:|NOT BOT QY:/) {
+         if($current_ip =~ m/\d/) {
+            $UNIQUE_BOTS{$current_ip} = 0;
+         }
+         next; 
+      }
+   }
+   
+   return if($num_new_records == 0);
+   
+   # push @doc, @RECORD;
+   
+   for my $doy (sort { $b <=> $a } keys %records ) {
+      my $aref = $records{$doy};
+      next if(@$aref == 0);
+      my $line = "<br>*** JULIAN DAY: $doy ***<br>\n";
+      push(@doc, $line);
+      # push @RECORD, $line;
+      foreach my $record (reverse @$aref) {
+         push @doc, $record;
+         # push @RECORD, $record;
+      }
+   }
+ 
+   push @doc, "\n";
+   if(0) {
+      foreach my $record (@doc) {
+         print $record;
+      }
+   }
+
+   my $num_users = keys %UNIQUE_USERS;
+   my $num_bots = keys %UNIQUE_BOTS;
+   if($num_users > $num_bots) {
+      $num_users -= $num_bots;
+   }
+   push @doc, "UNIQUE_USERS: $num_users<br>\n";
+   push @doc, "UNIQUE_BOTS: $num_bots<br>\n";
+   
+   push @doc, "\n</body>\n";
+   push @doc, "</html>\n";
+   
+   system("rm $OUTPUT_FILENAME") if(-e $OUTPUT_FILENAME);
+   write_file($OUTPUT_FILENAME, @doc);
+   return($SUCCESS);
+}
+
+sub get_lines
+{
+   my @lines = ();
+   if($NUM_LINES == 0) {
+      @lines = read_file($GIMME_FILENAME);
+      $NUM_LINES = @lines;
+   }
+   else {
+      my $command = "wc -l $GIMME_FILENAME";
+      my $stuff = `$command`;
+      if($stuff =~ m/^\d+/) {
+         my $current_lines = $&;
+         #if($current_lines > $NUM_LINES) {
+            @lines = read_file($GIMME_FILENAME);
+            $NUM_LINES = @lines;
+         #}
+      }
+      else {
+         @lines = read_file($GIMME_FILENAME);
+         $NUM_LINES = @lines;
+      }
+   }
+   return(\@lines);
+}
+
+
+sub get_came_from(@)
+{
+   my ($line) = @_;
+   my $came_from = q{};
+   return($came_from) if(not defined($line) or $line !~ m/\w/);
+   chomp($line);
+   return($came_from) if($line =~ m/gimmeusa\.com/);
+   return($came_from) if($line !~ m/[a-z]/);
+   $line =~ s/^\s*RR:\s*//;
+   $line =~ s/\s+$//;
+   return($came_from) if($line !~ m/\w/ or $line =~ m/null/);
+   
+   $line =~ s/\/+$//;
+   $line =~ s/^https*:\/\///;
+   if($line =~ m/\//) {
+      $line = $`;
+   }
+   return($came_from) if($line !~ m/\w/);
+   $came_from = $line;
+   if(length($came_from) > 40) {
+      $came_from = substr($came_from, 0, 40);
+   }
+   return($came_from);
+}
+ 
+sub get_timestamp(@)
+{
+   my ($TS) = @_;
+   return if(not defined($TS) or $TS !~ m/\d/);
+   chomp($TS);
+   $TS =~ s/^\s*TS:\s*//;
+   my $orig_ts = $TS;
+   if($TS !~ m/^2016\s+/) {
+      print "get_timestamp: not 2016: $TS\n";
+      return($orig_ts);
+   }
+   $TS = $';
+   if($TS !~ m/^(\d+)\s+/) {
+      print "get_timestamp: no doy: $TS\n";
+      return($orig_ts);      
+   }
+   
+   my $doy = $1;
+   $TS = $';
+   return($orig_ts, $doy) if($TS !~ m/\d+:\d+:\d+/);
+   $doy -= 1; # first day if year is 1, not 0
+   my $index = $doy % 7;
+   if($index > 7) {
+      print "FAULT: day of week index > 7\n";
+      return($orig_ts);
+   }
+   my $dow = $dows[$index];
+   # print ("$dow\n");
+   $doy += 1;
+   
+   my $timestamp = "$dow $TS";
+   return($timestamp, $doy);
+}
+
+
+sub test_time
+{
+   print "TEST TIME\n";
+   # test last day of month
+   my $month = 11;
+   my $days = 0;
+   for(my $i=0;$i<=$month;$i++) {
+      $days += $dpm[$i];
+   }
+   my $stuff = "TS: 2016 $days 00:04:34";
+   
+   my $timestamp = get_timestamp($stuff);
+   print "time: $timestamp\n";
+   
+}

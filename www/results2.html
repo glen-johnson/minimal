@@ -1,0 +1,40 @@
+' autofocus="autofocus">
+                        <span class="input-group-addon input-button">
+                           <button type="submit">
+                              <span class="glyphicon glyphicon-search large-font"></span>
+                           </button>  
+                        </span>
+                     </form>
+                      
+                     <div class="tfclear"></div>
+                     <script>
+                        document.getElementById('trtextinput').focus();
+                        var a = document.getElementById('trnewsearch');
+                        a.addEventListener('submit',function(e) {
+                           e.preventDefault();
+                           var b = document.getElementById('trtextinput').value;
+                           doNewQuery(a,b);
+                        });
+                     </script>
+                  </div>
+               </div>
+            </div>
+            
+            <!--
+            <div class="top-smallbuffer text-center text-muted">
+               <p>and we deleted Google ads, user tracking, cookies & click fees!</p>
+            </div>
+            -->
+           
+         </div>
+      </div>
+      
+      <!--
+      <div class="text-center top-buffer">
+         <a class="btn btn-social-icon btn-twitter" href="https://twitter.com/intent/tweet?text=Because everthing unique on the planet comes from a small store. http://trendingsmall.com"><span class="fa fa-twitter"></span></a>
+         <a class="btn btn-social-icon btn-facebook" href="https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Ftrendingsmall.com%2F&amp;src=sdkpreparse"><span class="fa fa-facebook"></span></a>
+         <a class="btn btn-social-icon btn-pinterest" href="https://www.pinterest.com/pin/create/link/?url=http%3A%2F%2Ftrendingsmall.com&media=http%3A%2F%2Ftrendingsmall.com%2Fimages%2Fpinterest.jpg&description=Because%20everything%20unique%20on%20the%20planet%20comes%20from%20a%20small%20store."><span class="fa fa-pinterest"></span></a>
+      </div>
+      -->
+      
+      <section id="results" class="padding-left top-medbuffer">

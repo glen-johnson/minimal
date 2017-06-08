@@ -1,0 +1,221 @@
+package com.jacamars.minimal.response;
+
+import java.util.HashSet;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Arrays;
+
+public class Query {
+	public int numFound;
+        public float maxScore;
+	public int start = 0;
+	public List<Document> docs;
+	
+	HashSet phones = new HashSet();
+	HashSet descriptions = new HashSet();
+	HashSet highlights = new HashSet();
+	HashMap<String,String> hm_desc = new HashMap<>();
+	HashMap<String,String> hm_href    = new HashMap<>();
+
+	public Query() {
+
+	}
+
+	public void toHtml(StringBuilder sb, Highlighting highlighting, String query) {
+
+		StringBuilder dt = new StringBuilder();
+
+		int index = 1;
+
+		sb.append("<div class='col-lg-6 col-lg-offset-3 text-center'>\n");
+
+		sb.append("     <div class='checkbox sort-info'>");
+		//sb.append("        <label><input type='checkbox' name='showdetails' id='showdetails'>Hide Details &nbsp; &#8226; &nbsp; Post your favorite business <a href=\"post.html\">here</a></label>");
+		sb.append("        <label><input type='checkbox' name='showdetails' id='showdetails'>Hide Details</label>");
+		sb.append("     </div>");
+
+
+		//sb.append("     <div class='btn-group' id=showDetail data-toggle='buttons'>");
+		//sb.append("        <label class='btn btn-default active'><input type='radio' value='on'/>Show Details</label>\n");
+		//sb.append("        <label class='btn btn-default'><input type='radio' value='off'/>Hide Details</label>\n");
+		//sb.append("     </div>");
+
+
+		sb.append("</div>\n");
+	
+		sb.append("<div class='container search-result'>\n");
+		sb.append("   <div class='row'>\n");
+
+		sb.append("      <div hidden id='buttons' class='section col-sm-12 bottom-bigbuffer'>\n");
+		sb.append("         <div class='panel-group category-products' id='accordian'>\n");
+
+		dt.append("      <div id='details' class='section col-md-9 col-md-offset-2 clearfix bottom-bigbuffer'>\n");
+		dt.append("         <div class='panel-group category-products' id='accordian'>\n");
+
+                // Amazon and Google at the bottom
+                query = query.replaceAll("AND", "");
+                query = query.replaceAll("\"", "");
+		String amazon_href = "http://www.amazon.com/s/ref=nb_sb_noss_2?url=search-alias%3Daps&field-keywords=" + query;
+		String amazon_details = "Send your query to Amazon";
+		int amazon_flag = 0;
+
+		String google_href = "https://www.google.com/search?q=" + query + "&ie=utf-8&oe=utf-8";
+		String google_details = "Send your query to Google";
+		
+		Boolean resetMaxScore = true;				
+
+		for (Document doc : docs) {
+			
+			//Document doc = docs.get(1);
+				
+			Field f = null;
+			String context = null;
+			if (highlighting != null) {
+				f = highlighting.get(doc.id);
+				context = f.getContext().toString();
+			}
+			String phone = doc.phone;
+			String description = doc.description;
+			String company = doc.company;
+			String href  = doc.href;
+			if(company == null || company.length() < 3)
+				continue;
+
+			if(description == null || description.length() < 10) 
+				continue;
+
+			if(href == null || href.length() < 7)
+				continue;
+
+			if(resetMaxScore) {
+				maxScore = doc.score;
+				resetMaxScore = false;
+			}
+				
+
+			if ((phones.contains(phone))==false &&
+				descriptions.contains(description)==false) {
+					// highlights.contains(context)==false) {
+
+				//doc.toButtons(sb, index, context);
+				hm_desc.put(company, description);
+				hm_href.put(company, href);
+				
+				
+				doc.toHtml(dt, index++, context, maxScore);
+
+				//f.toHtml(sb);
+	
+				if(phone != null && phone.length() > 0)
+					phones.add(phone);
+	
+				descriptions.add(description);
+	
+				// highlights.add(context);
+					
+				if (index > 300) 
+						break;
+			}
+		}
+
+		if(index == 1) {
+			sb.append("<h3><em>No specialty business results, sorry!</em></h3>");
+			dt.append("<h3><em>No specialty business results, sorry!</em></h3>");
+		}
+		else {
+			// 'hide details' display is a lexical sort
+			String[] companies = hm_desc.keySet().toArray(new String[hm_desc.size()]);
+			Arrays.sort(companies);
+			for(int i =0; i < companies.length; i++) {
+				String company     = companies[i];
+				String description = hm_desc.get(company);
+				String href        = hm_href.get(company);
+				// System.out.println(href + " => " + description);
+                   		description = description.replaceAll("[;'\"]", "");
+
+		   		sb.append("<div class=\"col-md-4 news\">");
+		  		sb.append("  <a href=\"http://" + href + "\" data-toggle=\"tooltip\" title='"+description+"' onclick=\"openStore('"+href+"')\" target=\"_blank\">"+company+"</a>\n");
+				sb.append("         </div>\n");
+	   		}
+		}
+
+                getAmazonButton(sb, query, index, amazon_href, amazon_details);
+                getAmazonDetails(dt, query, index, amazon_href, amazon_details);
+		++index;
+                getGoogleButton(sb, query, index, google_href, google_details);
+                getGoogleDetails(dt, query, index, google_href, google_details);
+		++index;
+
+				
+		sb.append("         </div>"); // panel
+		sb.append("      </div>");   // section
+
+		dt.append("         </div>"); // panel
+		dt.append("      </div>"); // section
+
+		String html = dt.toString();
+		sb.append(html);
+
+		sb.append("   </div>"); // row
+		sb.append("</div>"); // container-fluid
+			
+		//	System.out.println("\n"+ sb.toString() + "\n");
+
+	}
+
+	public void getAmazonDetails(StringBuilder page, String query, int index, String href, String details) {
+
+
+		page.append("         <div class=\"btn-group company\">\n");
+		page.append("            <button type=\"button\" class=\"btn btn-lg btn-default indexpadding disabled\">" + index + "</button>\n");
+		page.append("              <a href=\"" + href + "\" onclick=\"openStore('"+href+"')\" target=\"_blank\" class=\"btn btn-lg btn-default\">Amazon</a>\n");
+
+		page.append("           </div>");
+		page.append("              <div class='desc city-state'>");
+		page.append("In 10 years, will we all have to work at Amazon?");
+		page.append("	      </div>");
+
+		page.append("           <div class='desc sort-info last-line'>");
+		page.append(details);
+		page.append("           </div>");
+
+		page.append("<div class=\"progress\">");
+		page.append("   <div class=\"progress-bar progress-bar-success\" role=\"progressbar\" aria-valuenow=\"0\" aria-valuemin=\"0\" aria-valuemax=\"100\" style=\"width: 0%\">");
+		page.append("   </div>");
+		page.append("</div>");
+        }
+
+
+	public void getAmazonButton(StringBuilder page, String query, int index, String href, String details) {
+
+		page.append("<div class=\"col-md-4 news\">");
+		page.append("  <a href=\"" + href + "\" data-toggle=\"tooltip\" title='" + details +"' onclick=\"openStore('"+href+"')\" target=\"_blank\">Amazon</a>\n");
+		page.append("</div>\n");
+	}
+
+	public void getGoogleDetails(StringBuilder page, String query, int index, String href, String details) {
+
+
+		page.append("         <div class=\"btn-group company\">\n");
+		page.append("            <button type=\"button\" class=\"btn btn-lg btn-default indexpadding disabled\">" + index + "</button>\n");
+		page.append("              <a href=\"" + href + "\" onclick=\"openStore('"+href+"')\" target=\"_blank\" class=\"btn btn-lg btn-default\">Google</a>\n");
+
+		page.append("           </div>");
+		page.append("              <div class='desc city-state'>");
+		page.append("Search bigger stores, department stores and chain stores");
+		page.append("	      </div>");
+
+		page.append("           <div class='desc sort-info last-line'>");
+		page.append(details);
+		page.append("           </div>");
+        }
+
+
+	public void getGoogleButton(StringBuilder page, String query, int index, String href, String details) {
+		page.append("<div class=\"col-md-4 news\">");
+		page.append("   <a href=\"" + href + "\" data-toggle=\"tooltip\" title='" + details +"' onclick=\"openStore('"+href+"')\" target=\"_blank\">Google</a>\n");
+		page.append("</div>\n");
+	}
+
+}
+

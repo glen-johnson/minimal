@@ -1,0 +1,143 @@
+package com.jacamars.minimal.response;
+
+import java.io.File;
+import java.util.List;
+
+public class Document {
+	public String id;
+	public String phone;
+	public String domain_name;
+	public String company;
+	public String title;
+	public String locale;
+	public String description;
+	public String thumbnail;
+	public String href;
+	public int num_links;
+	public float score;
+	public String pagename;
+	// public List<String> anchor_hrefs;
+	public String anchor_hrefs;
+
+
+	public Document() {
+		
+	}
+	
+	public void toHtml(StringBuilder sb, int index, String context, float maxScore) {
+
+		//System.out.println("Score: " + score);
+		
+		int show_image = 60;
+                Boolean show_score = true;
+		String company = this.company;
+		String href = this.href;
+		String title = this.title;
+		String pagename = this.pagename;
+		String domain_name = this.domain_name;
+		String file = this.thumbnail;
+		//List<String> anchor_hrefs = this.anchor_hrefs;
+
+		
+
+		if(title != null) {
+		    title = title.replaceAll("\"", "");
+		}
+		else {
+			title = "no title";
+		}
+
+		if(index <= show_image && file != null) {
+			String filename = "/images/thumbnails/" + file;
+			sb.append("<div class=\"media\">");
+			sb.append("<div class=\"media-left\">");
+
+			// image
+		   	// sb.append(" <img style=\"float:left\" src=\"" + filename + "\" class='img-responsive img-rounded bottom-buffer'>\n"); 
+		   	sb.append(" <a href=\"http://" + href + "\" onclick=\"openStore('"+href+"')\" target=\"_blank\"><img style=\"float:left\" src=\"" + filename + "\" class='img-responsive img-rounded bottom-buffer'/></a>\n"); 
+		   	sb.append("<div class=\"media-body\">");
+
+			// company
+			sb.append("<div class='desc results-title'>");
+			sb.append("      <a href=\"http://" + href + "\" onclick=\"openStore('"+href+"')\" target=\"_blank\">"+index+". "+company+"</a>\n");
+			sb.append("</div>");
+
+			// description
+			sb.append("<div class='desc results-description'>");
+			sb.append(context);
+			//sb.append(description);
+			//sb.append(" ( " + pagename + " ) ");
+			sb.append("</div>");
+
+		  	sb.append("</div>"); // media
+		  	sb.append("</div>"); // media-left
+		  	sb.append("</div>"); // media-body
+		}
+		else {
+			// company
+			sb.append("<div class='desc results-title'>");
+			sb.append("      <a href=\"http://" + href + "\" onclick=\"openStore('"+href+"')\" target=\"_blank\">"+index+". "+company+"</a>\n");
+			sb.append("</div>");
+
+			// description
+			sb.append("<div class='results-description'>");
+			//sb.append(description);
+			sb.append(context);
+			// sb.append(" ( " + pagename + " ) ");
+			sb.append("</div>");
+		}
+
+		//String links = "";
+		//int size = 0;
+		//if(anchor_hrefs != null) {
+		//	size = anchor_hrefs.size();
+		//	int cnt = 0;
+		//	for(String item:anchor_hrefs) {
+		//		links += item;
+		//		if(++cnt < size)
+		//			links += " &#8226; ";
+		//	}
+		// System.out.println("LINKS: " + stuff);
+		//}
+		
+		String links = this.anchor_hrefs;
+		if(links != null) {
+			sb.append("<em>page links</em>: <br>");
+			sb.append("<div class='desc results-links'>");
+			sb.append(links);
+			sb.append("</div>");
+		}
+
+		// score bar
+		if(show_score) {
+
+			// instead of score, here is a customized <hr>
+			//sb.append("<hr style=\"height:1px;border:none;color:#C0C0C0;background-color:#C0C0C0;\">");
+			int rel = 0;
+			if(score > 0.0) {
+				rel = (int)(85 * score/maxScore);
+			}
+			sb.append("<div class=\"progress\">");
+			sb.append("   <div class=\"progress-bar progress-bar-success\" role=\"progressbar\" aria-valuenow=\"" + rel + "\" aria-valuemin=\"0\" aria-valuemax=\"100\" style=\"width: " + rel + "%\">");
+    			//sb.append("<span class=\"sr-only\">40% Complete (success)</span>");
+			sb.append("   </div>");
+			sb.append("</div>");
+		}
+	}
+
+
+	public void toButtons(StringBuilder sb, int index, String context) {
+
+		if (context != null) {
+
+		   String company = this.company;
+		   String href = this.href;
+                   context = context.replaceAll("[;'\"]", "");
+
+		   sb.append("<div class=\"col-md-4 news\">");
+
+		   sb.append("  <a href=\"http://" + href + "\" data-toggle=\"tooltip\" title='"+context+"' onclick=\"openStore('"+href+"')\" target=\"_blank\">"+company+"</a>\n");
+		sb.append("         </div>\n");
+	   }
+	}
+}

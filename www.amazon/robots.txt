@@ -1,0 +1,30 @@
+User-agent: *
+Disallow: /css
+Disallow: /fonts
+Disallow: /icons
+Disallow: /bin
+Disallow: /build
+Disallow: /libs
+Disallow: /src
+Disallow: /images
+Disallow: /js
+
+User-agent: Twitterbot
+Disallow:
+
+User-agent: Baiduspider
+Disallow: *
+
+User-agent: Baidu
+Disallow: *
+
+User-agent: Yandex
+Disallow: *
+
+User-agent: MJ12bot
+Disallow: *
+
+User-agent: Mail.RU_Bot
+Disallow: *
+
+

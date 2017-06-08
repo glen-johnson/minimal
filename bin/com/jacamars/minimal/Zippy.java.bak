@@ -1,0 +1,827 @@
+      package com.jacamars.minimal;
+
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.zip.GZIPOutputStream;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+
+import javax.servlet.MultipartConfigElement;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.AbstractHandler;
+import org.eclipse.jetty.server.session.SessionHandler;
+
+import com.google.gson.Gson;
+
+
+/**
+ * Creates the HTTP handler for the Minimal server. This is an adaptation of the
+ * Jacamar's Inc. prototype web server. This source code is licensed under
+ * Apache Commons 2.
+ * 
+ * @author Ben M. Faul.
+ *
+ */
+
+
+public class Zippy implements Runnable {
+	/** The thread the server runs on */
+	Thread me;
+	/** The default HTTP port */
+	public static Config config;
+
+	public static StringBuilder resultsPart1;
+	public static StringBuilder resultsPart2;
+
+
+	/**
+	 * Creates the default Server
+	 * 
+	 * @param args
+	 *            . String[]. Args[0] contains the name of the users file, if
+	 *            not, presume "users.json"
+	 * @throws Exception
+	 *             on network or JSON parsing errors.
+	 */
+
+	public static void main(String[] args) throws Exception {
+		String configFile = "config.json";
+		if (args.length > 0)
+			configFile = args[0];
+		new Zippy(configFile);
+	}
+
+
+	/**
+	 * Creates the Skrambler instance and starts it. The Jetty side receives
+	 * ajax calls for Mosaic actions.
+	 * 
+	 * @param configFile
+	 *            String. The name of the users JSON file.
+	 * @throws Exception
+	 *             or network errors.
+	 */
+
+	public Zippy(String configFile) throws Exception {
+		byte[] encoded = Files.readAllBytes(Paths.get(configFile));
+		String str = Charset.defaultCharset().decode(ByteBuffer.wrap(encoded))
+				.toString();
+
+		Gson gson = new Gson();
+		config = (Config) gson.fromJson(str, Config.class);
+
+		Core.getInstance().connectJedis();
+
+		encoded = Files.readAllBytes(Paths.get(config.results));
+		str = Charset.defaultCharset().decode(ByteBuffer.wrap(encoded))
+					.toString();
+		String parts [] = str.split("__RESULTS__");
+		resultsPart1 = new StringBuilder(parts[0]);
+		resultsPart2 = new StringBuilder(parts[1]);
+
+		me = new Thread(this);
+		me.start();
+	}
+
+
+	/**
+	 * Starts the JETTY server
+	 */
+
+	 public void run() {
+		Server server = new Server(config.port);
+		Handler handler = new Handler();
+
+		try {
+
+			SessionHandler sh = new SessionHandler(); // org.eclipse.jetty.server.session.SessionHandler
+			sh.addEventListener(new CustomListener());
+			sh.setHandler(handler);
+			server.setHandler(sh);
+			server.start();
+			server.join();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	} 
+}
+
+
+/**
+ * The class that handles HTTP calls for Skrambler actions.
+ * 
+ * @author Ben M. Faul
+ *
+ */
+
+@MultipartConfig
+
+class Handler extends AbstractHandler {
+
+	/**
+	 * The property for temp files.
+	 */
+	private static final MultipartConfigElement MULTI_PART_CONFIG = new MultipartConfigElement(
+			System.getProperty("java.io.tmpdir"));
+
+
+	private NashHorn scripter;
+
+	@Override
+	public void handle(String target, Request baseRequest,
+			HttpServletRequest request, HttpServletResponse response)
+			throws IOException, ServletException {
+		
+
+		response.addHeader("Access-Control-Allow-Origin", "*");
+		response.setHeader("Cache-Control","max-age=86400");
+		response.setHeader("Cache-Control","must-revalidate");
+		response.setContentType("text/html;charset=utf-8");
+		response.setStatus(HttpServletResponse.SC_OK);
+		baseRequest.setHandled(true);
+
+		HttpSession session = request.getSession();
+		String userAgent = request.getHeader("User-Agent");
+		long count = 0;
+
+		try {
+			count = Core.getInstance().logSession(session.getId());
+
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
+		int code = 200;
+		String html = "";
+
+		InputStream body = request.getInputStream();
+		baseRequest.setHandled(true);
+
+		//System.out.println("TARGET: " + target);
+
+		if (target.equals("/")) {
+			target = "/index.html";
+		}
+
+		else if(target.endsWith(".php") || target.contains("workspace/Minimal")) {
+			response.sendError(HttpServletResponse.SC_NOT_FOUND);
+			return;
+		}
+
+		else if (target.contains("/results")) {
+
+			// get details for logging
+                        Calendar calendar = Calendar.getInstance();
+                        int dayOfYear = calendar.get(Calendar.DAY_OF_YEAR);
+                        SimpleDateFormat format1 = new SimpleDateFormat("YYYY DD HH:mm:ss");
+                        String formatted = format1.format(calendar.getTime());
+                        String ipAddress = this.getIpAddress(request);
+			String[] ip = ipAddress.split(":");
+                        String referer = request.getHeader("referer");
+
+			// print it
+			System.out.println("\n=============================");
+                        System.out.println("TS: " + formatted);
+			System.out.println("IP: " + ip[0]);
+			System.out.println("RR: " + referer);
+			System.out.println("UA: " + userAgent);
+			// System.out.println("SS: " + session.getId());
+
+
+			String url = request.getQueryString();
+			if(url == null || url.endsWith(".html") || url.endsWith("town=set")) {
+				response.sendError(HttpServletResponse.SC_NOT_FOUND);
+				return;
+			}
+			response.setStatus(HttpServletResponse.SC_OK);
+			url = url.replaceAll("%20", " ");
+			url = url.trim().replaceAll(" +", " ");
+
+			String query = getQuery(url);
+
+			if(query == null) {
+				target = "/index.html";
+			}
+
+			else if(userAgent.contains("bot")) {
+				System.out.println("BOT: " + query + ": " + userAgent);
+				//target = "/index.html";
+				response.sendError(HttpServletResponse.SC_NOT_FOUND);
+				return;
+                	}
+
+			else if(! query.contains("&cosmo") && ! query.contains("&mindy")) {
+				//System.out.println("NOT: " + query + ": " + userAgent);
+				//response.sendError(HttpServletResponse.SC_NOT_FOUND);
+				target = "/index.html";
+			}
+
+			else  {
+	                        String decoded_query = null; 
+	                        Boolean no_query     = true;
+				Boolean domain_flag  = false;
+				String queryResults  = null;
+
+				if(query.contains("&cosmo")) {
+					query = query.substring(0, query.indexOf("&cosmo"));
+				}
+				else if(query.contains("&mindy")) {
+	       				System.out.println("SHOPPING IDEAS: " + query);
+					query = query.substring(0, query.indexOf("&mindy"));
+				}
+					
+				no_query = false;
+	                        decoded_query = cleanQuery(query); 
+				domain_flag = testForDomain(query);
+				if(domain_flag == true) {
+					query = query.toLowerCase();
+					decoded_query = query;
+				       	System.out.println("DOMAIN: " + query);
+				}
+
+				try {
+					queryResults = getQueryResults(response, decoded_query, domain_flag);
+				} catch (Exception e) {
+					queryResults = null;
+				}
+	
+				//StringBuilder page = getPageHeader(query); 
+		                StringBuilder page =  new StringBuilder(); 
+
+				// page.append(Zippy.resultsPart1);
+
+				// getScripts(page, query, decoded_query);
+
+				if(queryResults != null)
+					page.append(queryResults);
+				else 
+					appendNoResults(page);
+
+				// page.append(Zippy.resultsPart2);
+	
+				html = page.toString();
+				// System.out.println("Zippy HTML" + html);
+	
+				baseRequest.setHandled(true);
+
+				try {
+					sendResponse(response, html);
+
+				} catch (Exception e) { }
+	
+				return;
+	
+			}
+		}
+
+		// googling "gimmeusa.com" has this unsupported page
+		else if (target.contains("post.html")) {
+			target = "/index.html";
+		}
+
+		else if (target.contains("gimme-log")) {
+			target = "/support/gimme-log.html";
+		}
+
+
+
+		else if (target.contains("/ga-analytics=")) {
+			// "ga-analytics" string is used so we dont raise flags about privacy
+	                target = target.substring(target.indexOf("=") + 1);
+
+			// this case exists to tell us a user is visiting our stores
+        		System.out.println("STORE: " + target);
+			return;
+		}
+
+		else if (target.contains("robots.txt")) {
+        		System.out.println("ROBOTS: " + target);
+		}
+
+		else if (target.endsWith(".html")) {
+			if(! target.contains("/venues/")) {
+				boolean exists = target.matches("/about.html|/tos.html|/faq.html|/crawler.html|/crawler_doc.html|/news.html|/boost.html");
+				if(exists == false) {
+					response.sendError(HttpServletResponse.SC_NOT_FOUND);
+					return;
+				}
+			}
+        		System.out.println("FILE: " + target);
+		}
+
+		else if (target.contains("/sendMail")) {
+			try {
+				Core.getInstance().sendMail(body);
+
+			} catch (Exception e) {
+				e.printStackTrace();
+				html = e.toString();
+			}
+                        // target = "/";
+
+			//html = "I Sent your mail!";
+			//response.setStatus(HttpServletResponse.SC_OK);
+			//baseRequest.setHandled(true);
+			//response.getWriter().println(html);
+			return;
+
+		}
+
+		if (target.equals("/index.html")) {
+        		System.out.println("HOME: " + target);
+		}
+
+
+        	//System.out.println("TARGET: " + target);
+
+		session.setAttribute("path", target);
+		String type = request.getContentType();
+		response.addHeader("Access-Control-Allow-Origin", "*");
+		String ipAddress = getIpAddress(request);
+
+		try {
+
+			if (type != null && type.contains("multipart/form-data")) {
+				try {
+					String result = "";
+					// String result = Sqramble.mosaic.multiPart(target,
+					// baseRequest, request, MULTI_PART_CONFIG);
+					response.setStatus(HttpServletResponse.SC_OK);
+					baseRequest.setHandled(true);
+					response.getWriter().println(result);
+				} catch (Exception err) {
+					Gson gson = new Gson();
+					response.setStatus(HttpServletResponse.SC_OK);
+					Map m = new HashMap();
+					m.put("error", true);
+					m.put("message", "Internal error: " + err.toString());
+
+					baseRequest.setHandled(true);
+					response.getWriter().println(gson.toJson(m));
+					err.printStackTrace();
+				}
+
+				baseRequest.setHandled(true);
+				// response.getWriter().println(json); TBD
+				return;
+
+			}
+
+			if (target.contains("favicon")) {
+				response.setStatus(HttpServletResponse.SC_OK);
+				baseRequest.setHandled(true);
+				response.getWriter().println("");
+				return;
+			}
+
+			
+			if (target.contains("captureQuery")) {
+				response.setStatus(HttpServletResponse.SC_OK);
+				baseRequest.setHandled(true);
+				response.getWriter().println(Core.getInstance().handleCapture(body));
+				return;
+			}
+
+
+			type = null;
+
+			//System.out.println(target);
+
+
+			int x = target.lastIndexOf(".");
+			if (x >= 0) {
+				type = target.substring(x);
+			}
+
+			File f = null;
+			if (type != null) {
+				type = type.toLowerCase().substring(1);
+				type = MimeTypes.substitute(type);
+				response.setContentType(type);
+
+				if (target.indexOf(".") == -1) 
+					target += ".html";
+
+				f = new File("www" + target);
+				if (f.exists() == false) {
+					f = new File("www/support" + target);
+					if (f.exists() == false) {
+						f = new File(target);
+						if (f.exists() == false) {
+							f = new File("." + target);
+							if (f.exists() == false) {
+								f = new File(".." + target);
+								if (f.exists() == false) {
+									int k = target.indexOf("www");
+									if (k > 0) {
+										target = target.substring(k);
+										f = new File(target);
+										if (f.exists()==false) {
+											response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+											baseRequest.setHandled(false);
+											return;
+										}
+									}																					
+								}
+							}
+						}
+					}
+				}
+
+				if (type != null && type.endsWith("html")) {
+					String page = Charset
+							.defaultCharset()
+							.decode(ByteBuffer.wrap(Files.readAllBytes(Paths
+									.get(f.getPath())))).toString();
+					if (page.indexOf("<%") != -1) {                   // don't allocate resources when nashhorn is not needed.
+						scripter = new NashHorn(page);
+						scripter.setObject("core", Core.getInstance());
+						scripter.setObject("ipaddress", ipAddress);
+						scripter.setObject("session", session);
+						try {
+							page = scripter.getHtml();
+						} catch (Exception error) {
+							page = error.toString();
+						}
+					}
+
+					response.setContentType("text/html");
+					response.setStatus(HttpServletResponse.SC_OK);
+					baseRequest.setHandled(true);
+					response.getWriter().println(page);
+					return;
+				}
+
+				FileInputStream fis = new FileInputStream(f);
+				OutputStream out = response.getOutputStream();
+
+				// write to out output stream
+				while (true) {
+					int bytedata = fis.read();
+					if (bytedata == -1) {
+						break;
+					}
+					try {
+						out.write(bytedata);
+					} catch (Exception error) {
+						break; // screw it, pray that it worked....
+					}
+				}
+
+				// flush and close streams.....
+				fis.close();
+				try {
+					out.close();
+				} catch (Exception error) {
+
+				}
+
+				response.setContentType(type);
+				response.setStatus(HttpServletResponse.SC_OK);
+				baseRequest.setHandled(true);
+				return;
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			//e.printStackTrace();
+			System.err.println(e.toString());
+		}
+		baseRequest.setHandled(true);
+		response.getWriter().println(html);
+		response.setStatus(code);
+	}
+
+
+	/**
+	 * Return the IP address of this
+	 * 
+	 * @param request
+	 *            HttpServletRequest. The web browser's request object.
+	 * @return String the ip:remote-port of this browswer's connection.
+	 */
+
+	public String getIpAddress(HttpServletRequest request) {
+		String ip = request.getHeader("x-forwarded-for");
+		if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+			ip = request.getHeader("Proxy-Client-IP");
+		}
+		if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+			ip = request.getHeader("WL-Proxy-Client-IP");
+		}
+		if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+			ip = request.getRemoteAddr();
+		}
+		ip += ":" + request.getRemotePort();
+		return ip;
+	}
+
+	public static byte[] compressGZip(String uncompressed) throws Exception {
+	            ByteArrayOutputStream baos  = new ByteArrayOutputStream();
+	            GZIPOutputStream gzos       = new GZIPOutputStream(baos);
+	            byte [] uncompressedBytes   = uncompressed.getBytes();
+	            gzos.write(uncompressedBytes, 0, uncompressedBytes.length);
+	            gzos.close();
+	            return baos.toByteArray();
+	    }
+
+	public void getGimmeUSAlogo(StringBuilder page) {
+		page.append("<div class=\"container\">\n");
+		page.append("   <div class=\"col-lg-6 col-lg-offset-3 text-center\">\n");
+		page.append("      <div class=\"gimme-image\">\n");
+		page.append("            <img src=\"/images/search-logo.gif\" class=\"img-responsive center-block\" alt=\"GimmeUSA\">");
+		page.append("         </div>\n");
+		//page.append("         <div class=\"what-we-are bottom-buffer\">\n");
+		//page.append("            <p>A <u>private</u> search engine designed exclusively for <b>shopping</b></p>\n");
+		//page.append("         </div>\n");
+		page.append("   </div>\n");
+		page.append("</div>\n");
+	}
+
+	public void getGimmeUSAsearch_logo(StringBuilder page) {
+		page.append("<div class=\"container\">\n");
+		page.append("     <img src=\"/images/search-logo.small.gif\" class=\"img-responsive center-block top-buffer\" alt=\"GimmeUSA\">");
+		page.append("</div>\n");
+	}
+
+	public void getGimmeUSA(StringBuilder page) {
+		page.append("<div class=\"container\">\n");
+		page.append("  <div class=\"col-lg-6 col-lg-offset-3 text-center\">\n");
+		page.append("     <div class=\"back-logo\">\n");
+		page.append("        <h4><span class=\"span\">Better Search. Better Shopping.&#8482;</span></h4>\n");
+		page.append("     </div>\n");
+		page.append("  </div>\n");
+		page.append("</div>\n");
+	}
+
+	public void getQueryText(StringBuilder page, String query) {
+		page.append("<div class=\"container\">\n");
+		page.append("  <div class=\"last-query col-lg-6 col-lg-offset-3 text-center\">\n");
+		page.append("Query: " + query);
+		page.append("  </div>\n");
+		page.append("</div>\n");
+	}
+	
+	
+	public void getSearchBar(StringBuilder page, String query) {
+		page.append("<div class=\"container\">\n");
+		page.append("   <div class=\"col-sm-6 col-sm-offset-3 bottom-buffer\">\n");
+		page.append("      <form id=\"tfnewsearch\">\n");
+		page.append("         <div class=\"input-group\">\n");
+		page.append("            <input type=\"text\" class=\"form-control\" id=\"tftextinput\" name=\"q\" value=\"" + query + "\">\n");
+		page.append("            <span class=\"input-group-btn\">\n");
+		page.append("               <button type=\"submit\" class=\"btn btn-primary\"><span class=\"glyphicon glyphicon-search\"></span></button>\n");
+		page.append("            </span>\n");
+		page.append("         </div>\n");
+		page.append("      </form>\n");
+		page.append("   </div>\n");
+		page.append("   <div class=\"tfclear\"></div>\n");
+		// search bar callback
+		page.append("<script>\n");
+		page.append("   var a = document.getElementById('tfnewsearch');\n");
+		page.append("   a.addEventListener('submit',function(e) {\n");
+		page.append("      e.preventDefault();\n");
+		page.append("      doQuery();\n");
+		page.append("   });\n");
+		page.append("</script>\n");
+		page.append("</div>\n");
+	}
+
+
+       public void getDomainNameText(StringBuilder page) {
+		page.append("<div class='col-lg-6 col-lg-offset-3 text-center'>\n");
+		page.append("<div class='sort-info'>\n");
+
+		page.append("If this is a valid, registered domain name and you see \"No results\" we will look at the website to see if it fits on GimmeUSA.");
+
+		page.append("</div>\n");
+		page.append("</div>\n");
+        }
+
+       public void appendNoResults(StringBuilder page) {
+		page.append("<div class='col-lg-6 col-lg-offset-3 text-left'>\n");
+		page.append("<div class='sort-info'>\n");
+
+		page.append("No Results.");
+
+		page.append("</div>\n");
+		page.append("</div>\n");
+        }
+
+       public void getScripts(StringBuilder page, String query, String decoded_query) {
+
+		// suppress next query if same query
+		String sameQuery = decoded_query;
+		if(query == null)
+		   sameQuery = "ibehcywmlsjc";
+		page.append("\n<script>\n");
+		page.append("   function doQuery() {\n");
+		page.append("      var a = document.getElementById('tftextinput').value;\n");
+		page.append("         if(a !== '" + sameQuery + "') {\n");
+		page.append("            sendQuery(a);\n");
+		page.append("   }}\n");
+		page.append("</script>\n\n");
+
+		// on page load
+		page.append("<script>\n");
+		page.append("   $(document).ready(function() {\n");
+		page.append("      $('[data-toggle=\"tooltip\"]').tooltip();\n");
+		// in case user re-loads the page
+		page.append("      $('#hlbutton').prop('disabled', false);\n");
+		// put the query in the search form
+		if(query != null)
+			page.append("      $('#tftextinput').val('"+query+"');\n");
+		page.append("      });\n");
+		page.append("</script>\n\n");
+
+		// Highlighting is slow and does not do words out of order.
+		// Mitigate: call it for each word, limit 3, starting at the right end
+		page.append("<script>\n");
+		page.append("   function callhighlighter() {\n");
+		if(decoded_query != null) {
+
+			decoded_query = decoded_query.replaceAll("&", "");
+			decoded_query = decoded_query.replaceAll(" AND ", " ");
+			decoded_query = decoded_query.replaceAll(" OR ", " ");
+			if(decoded_query.contains(" NOT ")) {
+				String[] parts = decoded_query.split(" NOT ");
+				decoded_query = parts[0];
+			}
+			decoded_query.trim();
+
+	        	//System.out.println("callhighlighter: " + decoded_query);
+
+			if(decoded_query.contains(" ")) {
+
+				String parts[] = decoded_query.split(" ");
+				int pl = parts.length;
+				if(pl > 3) {
+					page.append("      $('div').highlight(\"" + parts[0] + "\");\n");
+					page.append("      $('div').highlight(\"" + parts[pl-2] + "\");\n");
+					page.append("      $('div').highlight(\"" + parts[pl-1] + "\");\n");
+				}
+				else if(pl == 3) {
+					page.append("      $('div').highlight(\"" + parts[pl-3] + "\");\n");
+					page.append("      $('div').highlight(\"" + parts[pl-2] + "\");\n");
+					page.append("      $('div').highlight(\"" + parts[pl-1] + "\");\n");
+				}
+				else if(pl == 2) {
+					page.append("      $('div').highlight(\"" + parts[pl-2] + "\");\n");
+					page.append("      $('div').highlight(\"" + parts[pl-1] + "\");\n");
+				}
+				else if(pl == 1)
+					page.append("      $('div').highlight(\"" + parts[pl-1] + "\");\n");
+				else
+					page.append("      $('div').highlight(\"" + decoded_query + "\");\n");
+			}
+			else
+				page.append("      $('div').highlight(\"" + decoded_query + "\");\n");
+	
+		}
+		page.append("}\n");
+		page.append("</script>\n\n");
+
+
+	}
+
+	public String getQuery(String url) {
+	
+		if(url == null || ! url.contains("=")) 
+			return(null);
+
+		String query = url.substring(url.indexOf("=") + 1);
+
+		if(query == null || query.length() < 3) 
+			return(null);
+
+		if(query.contains("&utm_")) {
+	       		System.out.println("TWITTER: " + query);
+			query = query.substring(0, query.indexOf("&utm_"));
+			query = query + "&cosmo";
+		}
+
+		query = query.replaceAll("%20", " ");
+		query = query.trim().replaceAll(" +", " ");
+
+		// allow longer lengths than the search bar for Shopping List items
+		if(query == null || query.length() < 3 || query.length() > 60) 
+			return(null);
+
+		return(query);
+	}
+
+	public Boolean testForDomain(String query) {
+		if(query == null || query.contains(" ")) 
+			return(false);
+
+		Pattern p = Pattern.compile("\\.(?:com|net|biz)$", Pattern.CASE_INSENSITIVE);
+		Matcher m = p.matcher(query);
+		if(m.find()) 
+			return(true);
+
+		return(false);
+	}
+	
+	public StringBuilder getPageHeader(String title) {
+
+		if(title == null) {
+			title = "No Results";
+		}
+		else {
+			title = title.replaceAll("\\+", " ");
+			title = title.replaceAll("%20", " ");
+			title = title.replaceAll("%26", "&");
+			title = title.replaceAll("%22", "\"");
+		}
+
+		StringBuilder page =  new StringBuilder("<!DOCTYPE html>\n"); 
+		page.append("<html lang=\"en-US\">\n");
+		page.append("<head>\n");
+		page.append("<meta charset=\"UTF-8\">\n");
+		page.append("<title>" + title + " - GimmeUSA</title>\n");
+
+		return(page);
+	}
+
+	public void sendResponse(HttpServletResponse response, String html) throws Exception {
+
+		try {
+			byte [] bytes = compressGZip(html);
+			response.addHeader("Content-Encoding", "gzip");
+			int sz = bytes.length;
+			response.setContentLength(sz);
+			response.getOutputStream().write(bytes);
+
+		} catch (Exception e) {
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			response.getOutputStream().println("");
+		}
+	}
+	
+ 	public String cleanQuery(String query) {
+		String cleanQuery = query;
+		// cleanQuery = cleanQuery.replaceAll("AND|OR|NOT", "");
+		cleanQuery = cleanQuery.replaceAll("\\+", " ");
+		cleanQuery = cleanQuery.replaceAll("%20", " ");
+		cleanQuery = cleanQuery.replaceAll("%26", "&");
+		cleanQuery = cleanQuery.replaceAll("%22", "\"");
+	        //cleanQuery = java.net.URLDecoder.decode(cleanQuery, "UTF-8"); 
+		return(cleanQuery);
+	}
+
+
+	public String getQueryResults(HttpServletResponse response, String decoded_query, Boolean domain_flag) throws Exception {
+
+		if(decoded_query == null)
+			return(null);
+
+		if(domain_flag == null)
+			domain_flag = false;
+
+		String ahtml[] = new String[2];
+
+		try {
+			ahtml = Core.getInstance().doQuery(decoded_query, domain_flag);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			// TODO Auto-generated catch block
+			System.err.println("Query error: " + e.getMessage());
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			return(null);
+		}
+		String numResults = ahtml[0];
+
+		if(numResults == null) 
+			return(null);
+
+		//int numResults = Integer.parseInt(stuff);
+		//if(numResults == 0)
+		//	return(null);
+
+		String html = ahtml[1];
+		return(html);
+	}
+}

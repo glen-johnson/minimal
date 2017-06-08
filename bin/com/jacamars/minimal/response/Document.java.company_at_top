@@ -1,0 +1,40 @@
+package com.jacamars.minimal.response;
+
+public class Document {
+	public String id;
+	public String phone;
+	public String domain_name;
+	public String company;
+	public String description;
+	public String href;
+	public int num_links;
+
+	public Document() {
+		
+	}
+	
+	public void toHtml(StringBuilder sb, int index, String context ) {
+		String company = this.company;
+		String href = this.href;
+
+		sb.append("<a href=\"http://" + href + "\">");
+		
+		sb.append("<div class=\"company\">");
+		sb.append("<span class=\"label label-primary\">" + index + "</span> " + company);
+		sb.append("</div>");
+
+		if (description.equals("none") == false) {
+			sb.append("<div class=\"desc\">");
+			sb.append(description);
+			sb.append("</div>");
+       		}
+
+		//sb.append("<div class='context'>");
+		sb.append("<div class='desc last-line'>");
+		sb.append("\"" + context + "\"");
+		sb.append("</div>");
+
+		sb.append("</a>");
+
+	}
+}

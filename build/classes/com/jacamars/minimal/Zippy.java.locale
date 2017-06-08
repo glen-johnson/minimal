@@ -1,0 +1,953 @@
+      package com.jacamars.minimal;
+
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.zip.GZIPOutputStream;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+
+import javax.servlet.MultipartConfigElement;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.AbstractHandler;
+import org.eclipse.jetty.server.session.SessionHandler;
+
+import com.google.gson.Gson;
+
+
+/**
+ * Creates the HTTP handler for the Minimal server. This is an adaptation of the
+ * Jacamar's Inc. prototype web server. This source code is licensed under
+ * Apache Commons 2.
+ * 
+ * @author Ben M. Faul.
+ *
+ */
+
+
+public class Zippy implements Runnable {
+	/** The thread the server runs on */
+	Thread me;
+	/** The default HTTP port */
+	public static Config config;
+
+	public static StringBuilder resultsPart1;
+	public static StringBuilder resultsPart2;
+
+
+	/**
+	 * Creates the default Server
+	 * 
+	 * @param args
+	 *            . String[]. Args[0] contains the name of the users file, if
+	 *            not, presume "users.json"
+	 * @throws Exception
+	 *             on network or JSON parsing errors.
+	 */
+
+	public static void main(String[] args) throws Exception {
+		String configFile = "config.json";
+		if (args.length > 0)
+			configFile = args[0];
+		new Zippy(configFile);
+	}
+
+
+	/**
+	 * Creates the Skrambler instance and starts it. The Jetty side receives
+	 * ajax calls for Mosaic actions.
+	 * 
+	 * @param configFile
+	 *            String. The name of the users JSON file.
+	 * @throws Exception
+	 *             or network errors.
+	 */
+
+	public Zippy(String configFile) throws Exception {
+		byte[] encoded = Files.readAllBytes(Paths.get(configFile));
+		String str = Charset.defaultCharset().decode(ByteBuffer.wrap(encoded))
+				.toString();
+
+		Gson gson = new Gson();
+		config = (Config) gson.fromJson(str, Config.class);
+
+		Core.getInstance().connectJedis();
+
+		encoded = Files.readAllBytes(Paths.get(config.results));
+		str = Charset.defaultCharset().decode(ByteBuffer.wrap(encoded))
+					.toString();
+		String parts [] = str.split("__RESULTS__");
+		resultsPart1 = new StringBuilder(parts[0]);
+		resultsPart2 = new StringBuilder(parts[1]);
+
+		me = new Thread(this);
+		me.start();
+	}
+
+
+	/**
+	 * Starts the JETTY server
+	 */
+
+	 public void run() {
+		Server server = new Server(config.port);
+		Handler handler = new Handler();
+
+		try {
+
+			SessionHandler sh = new SessionHandler(); // org.eclipse.jetty.server.session.SessionHandler
+			sh.addEventListener(new CustomListener());
+			sh.setHandler(handler);
+			server.setHandler(sh);
+			server.start();
+			server.join();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	} 
+}
+
+
+/**
+ * The class that handles HTTP calls for Skrambler actions.
+ * 
+ * @author Ben M. Faul
+ *
+ */
+
+@MultipartConfig
+
+class Handler extends AbstractHandler {
+
+	/**
+	 * The property for temp files.
+	 */
+	private static final MultipartConfigElement MULTI_PART_CONFIG = new MultipartConfigElement(
+			System.getProperty("java.io.tmpdir"));
+
+
+	private NashHorn scripter;
+
+	@Override
+	public void handle(String target, Request baseRequest,
+			HttpServletRequest request, HttpServletResponse response)
+			throws IOException, ServletException {
+		
+
+		response.addHeader("Access-Control-Allow-Origin", "*");
+		response.setContentType("text/html;charset=utf-8");
+		response.setStatus(HttpServletResponse.SC_OK);
+		baseRequest.setHandled(true);
+
+		HttpSession session = request.getSession();
+		String userAgent = request.getHeader("User-Agent");
+		long count = 0;
+
+		try {
+			count = Core.getInstance().logSession(session.getId());
+
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
+		if (count == 1) {
+                        Calendar calendar = Calendar.getInstance();
+                        int dayOfYear = calendar.get(Calendar.DAY_OF_YEAR);
+                        SimpleDateFormat format1 = new SimpleDateFormat("YYYY DD HH:mm:ss");
+                        String formatted = format1.format(calendar.getTime());
+                        System.out.println("TS: " + formatted);
+                        String ipAddress = this.getIpAddress(request);
+			String[] ip = ipAddress.split(":");
+			System.out.println("IP: " + ip[0]);
+                        String referer = request.getHeader("referer");
+			System.out.println("RR: " + referer);
+			System.out.println("UA: " + userAgent);
+			System.out.println("SS: " + session.getId());
+		}
+
+		
+
+		int code = 200;
+		String html = "";
+
+		InputStream body = request.getInputStream();
+		baseRequest.setHandled(true);
+
+		if (target.equals("/")) 
+			target = "/index.html";
+
+		if (target.contains("/results")) {
+
+			response.setStatus(HttpServletResponse.SC_OK);
+			String url = request.getQueryString();
+                        url = url.trim();
+			System.out.println("URL: " + url);
+
+                        // get the referer link for the back button
+                        String referer = request.getHeader("referer");
+	                //if(url.contains("&")) {
+       		       	//	int x = url.indexOf("&");
+                        //	referer = url.substring(x + 1);
+                        //        url = url.substring(0, x);
+                        //} 
+
+
+			// if bot, only honor google and bing bots
+			if(userAgent.contains("bot") && !(userAgent.contains("google") || userAgent.contains("bing"))) {
+				target = "/404.html";
+				System.out.println("404: " + userAgent);
+                       		//String query = "";
+                        	//if(url.contains("=")) {
+	                        //   query = url.substring(url.indexOf("=") + 1);
+       		                //    if(query == null || query.length() < 3) 
+			        //		query = "";
+               		        //}
+              			//target = "/products/B_" + query + ".html";
+				//System.out.println("QY: " + target);
+                	}
+			else  {
+	
+	                        Boolean no_query = false;
+				Boolean domain_flag = false;
+				Boolean locale_flag = false;
+				Boolean local_search = false;
+				System.out.println("PATH: " + url);
+	
+	
+				String query  = null;
+				String locale = null;
+	                        if(url == null || ! url.contains("=")) {
+	                                no_query = true;
+	                        }
+				else {
+	                        	query = url.substring(url.indexOf("=") + 1);
+	                        	if(query == null || query.length() < 3) {
+	                               		no_query = true;
+						query = null;
+					}
+				        System.out.println("QY: " + query);
+					if (! query.contains("+")) {
+		                		Pattern p = Pattern.compile("\\.(?:com|net|biz)$", Pattern.CASE_INSENSITIVE);
+		               			Matcher m = p.matcher(query);
+		                		if(m.find()) {
+							domain_flag = true;
+							query = query.toLowerCase();
+				        	   	System.out.println("DOMAIN: " + query);
+						}
+					}
+				}
+	
+	
+				StringBuilder page =  new StringBuilder("<!DOCTYPE html>\n"); 
+				page.append("<html lang=\"en-US\">\n");
+				page.append("<head>\n");
+				page.append("<meta charset=\"UTF-8\">\n");
+
+				// build the page <title>
+				String tquery = query;
+				if(query != null) {
+				   tquery = query.replaceAll("\\+", " ");
+				   tquery = tquery.replaceAll("%20", " ");
+				   tquery = tquery.replaceAll("%26", "&");
+				   page.append("<title>" + tquery + "</title>\n");
+				}
+				page.append(Zippy.resultsPart1);
+				
+				// StringBuilder page =  new StringBuilder(Zippy.resultsPart1); 
+
+				if(locale != null) {
+				   page.append("<script>\n");
+				   page.append("   $(document).data('locale','" + locale + "');\n");
+				   page.append("</script>\n");
+				}
+
+				if(tquery != null)
+				{
+			        	page.append("<script>\n");
+					page.append("   function highlighter() {\n");
+			 		if(tquery.contains(" ")) {
+			        		String[] words = tquery.split(" ");
+				   		for(String item:words) {
+				   			page.append("      $('div').highlight('" + item + "');\n");
+				   			page.append("      $('div').highlight('" + item + "');\n");
+				   		}
+					}
+					else {
+						page.append("      $('div').highlight('" + query + "');\n");
+						page.append("      $('#title').highlight('" + query + "');\n");
+					}
+					page.append("   }\n");
+					page.append("</script>\n");
+				}
+
+	                        String decoded_query = ""; 
+				if(no_query == false) {
+	                        	decoded_query = java.net.URLDecoder.decode(query, "UTF-8"); 
+				}
+	
+				//if(domain_flag || locale_flag || local_search) {
+				//	getNavButtons(page, query, locale);
+				//}
+				//else {
+				//	getBigStoreButtons(page, query);
+				//}
+				//getNavButtons(page, query, locale);
+
+				getGimmeUSA(page);
+				getSearchBar(page, decoded_query, locale_flag, locale);
+
+				page.append("   <div class=\"search-index\">");
+				page.append("      <div id='query-results'>");
+	
+				page.append("      <br>");
+	
+	
+				html = null;
+				int numResults = 0;
+	                        if(no_query == false) {
+	                                
+	
+				        String ahtml[] = new String[2];
+		
+					try {
+						ahtml = Core.getInstance().doQuery(query, domain_flag, locale, locale_flag);
+			
+					} catch (Exception e) {
+						e.printStackTrace();
+						// TODO Auto-generated catch block
+						System.err.println("Query error: " + e.getMessage());
+						response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		                                html = null;
+						//return;
+					}
+					String stuff = ahtml[0];
+					if(stuff != null) {
+						numResults = Integer.parseInt(stuff);
+						html = ahtml[1];
+					}
+
+					if(locale_flag) {
+						String radius = ahtml[2];
+						html = getSetLocaleText(locale, numResults, radius);
+					}
+	
+				        if(userAgent.contains("bot")) {
+					   System.out.println("BOT: " + decoded_query);
+					}
+					else {
+					   System.out.println("QY: " + decoded_query);
+					}
+
+					if(domain_flag == true && numResults == 0) {
+						// getDomainNameText(page);
+					}
+	
+				}
+
+
+
+				if(no_query == false && html != null) {
+					page.append(html);
+				}
+				else {
+					// this should never happen
+					// Query and DQuery always return something
+					if(domain_flag == true) {
+						getDomainNameText(page);
+					}	
+					getNoResults(page);
+				}
+	                        page.append("      </div>"); // search-index
+	                        page.append("   </div>"); // query-results
+	                        //page.append("</div>"); // container
+				page.append(Zippy.resultsPart2);
+	
+				html = page.toString();
+	
+				baseRequest.setHandled(true);
+	
+				
+	
+				try {
+	
+					byte [] bytes = compressGZip(html);
+					response.addHeader("Content-Encoding", "gzip");
+					int sz = bytes.length;
+					response.setContentLength(sz);
+					response.getOutputStream().write(bytes);
+	
+				} catch (Exception e) {
+					response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+					response.getOutputStream().println("");
+				}
+	
+				return;
+	
+			}
+		}
+
+		
+
+		if (target.contains("/fragment")) {
+			response.setStatus(HttpServletResponse.SC_OK);
+			String url = request.getQueryString();
+			byte buffer[] = new byte[1024];
+			int rc = body.read(buffer);
+			url = new String(buffer,0,rc);;
+                        if(! url.contains("=")) 
+                        	return;
+                           
+                       	String query = url.substring(url.indexOf("=") + 1);
+                        if(query == null || query.length() < 3)
+				return;
+          
+
+			html = null;
+			int numResults = 0;
+
+			try {
+                                Boolean isDomain = false;
+				String ahtml[] = new String[2];
+				ahtml = Core.getInstance().doQuery(query, isDomain, null, null);
+				String stuff = ahtml[0];
+				if(stuff == null) {
+					numResults = 0;
+				}
+				else {
+					numResults = Integer.parseInt(stuff);
+					html = ahtml[1];
+				}
+				byte [] bytes = compressGZip(html);
+				response.addHeader("Content-Encoding", "gzip");
+				int sz = bytes.length;
+				response.setContentLength(sz);
+				response.getOutputStream().write(bytes);
+
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+				response.getOutputStream().println("");
+			}
+
+			return;
+
+		}
+
+		if (target.contains("/robots")) {
+                   	target = "/robots.txt";
+		}
+
+		if (target.contains("/ga-analytics=")) {
+	                target = target.substring(target.indexOf("=") + 1);
+        		System.out.println("STORE: " + target);
+                	target = "/robots.txt";
+			return;
+		}
+
+
+
+		// ///////////////////////////////////////////////////////
+
+		if (target.contains("/sendMail")) {
+			try {
+				Core.getInstance().sendMail(body);
+
+			} catch (Exception e) {
+				e.printStackTrace();
+				html = e.toString();
+			}
+                        // target = "/";
+
+			//html = "I Sent your mail!";
+			//response.setStatus(HttpServletResponse.SC_OK);
+			//baseRequest.setHandled(true);
+			//response.getWriter().println(html);
+			return;
+
+		}
+
+
+		session.setAttribute("path", target);
+		String type = request.getContentType();
+		response.addHeader("Access-Control-Allow-Origin", "*");
+		String ipAddress = getIpAddress(request);
+
+		try {
+
+			if (type != null && type.contains("multipart/form-data")) {
+				try {
+					String result = "";
+					// String result = Sqramble.mosaic.multiPart(target,
+					// baseRequest, request, MULTI_PART_CONFIG);
+					response.setStatus(HttpServletResponse.SC_OK);
+					baseRequest.setHandled(true);
+					response.getWriter().println(result);
+				} catch (Exception err) {
+					Gson gson = new Gson();
+					response.setStatus(HttpServletResponse.SC_OK);
+					Map m = new HashMap();
+					m.put("error", true);
+					m.put("message", "Internal error: " + err.toString());
+
+					baseRequest.setHandled(true);
+					response.getWriter().println(gson.toJson(m));
+					err.printStackTrace();
+				}
+
+				baseRequest.setHandled(true);
+				// response.getWriter().println(json); TBD
+				return;
+
+			}
+
+			if (target.contains("favicon")) {
+				response.setStatus(HttpServletResponse.SC_OK);
+				baseRequest.setHandled(true);
+				response.getWriter().println("");
+				return;
+			}
+
+			
+			if (target.contains("captureQuery")) {
+				response.setStatus(HttpServletResponse.SC_OK);
+				baseRequest.setHandled(true);
+				response.getWriter().println(Core.getInstance().handleCapture(body));
+				return;
+			}
+
+
+			type = null;
+
+			//System.out.println(target);
+
+
+			int x = target.lastIndexOf(".");
+			if (x >= 0) {
+				type = target.substring(x);
+			}
+
+			File f = null;
+			if (type != null) {
+				type = type.toLowerCase().substring(1);
+				type = MimeTypes.substitute(type);
+				response.setContentType(type);
+
+				if (target.indexOf(".") == -1) 
+					target += ".html";
+
+				f = new File("www" + target);
+				if (f.exists() == false) {
+					f = new File("www/support" + target);
+					if (f.exists() == false) {
+						f = new File(target);
+						if (f.exists() == false) {
+							f = new File("." + target);
+							if (f.exists() == false) {
+								f = new File(".." + target);
+								if (f.exists() == false) {
+									int k = target.indexOf("www");
+									if (k > 0) {
+										target = target.substring(k);
+										f = new File(target);
+										if (f.exists()==false) {
+											response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+											baseRequest.setHandled(false);
+											return;
+										}
+									}																					
+								}
+							}
+						}
+					}
+				}
+
+				if (type != null && type.endsWith("html")) {
+					String page = Charset
+							.defaultCharset()
+							.decode(ByteBuffer.wrap(Files.readAllBytes(Paths
+									.get(f.getPath())))).toString();
+					if (page.indexOf("<%") != -1) {                   // don't allocate resources when nashhorn is not needed.
+						scripter = new NashHorn(page);
+						scripter.setObject("core", Core.getInstance());
+						scripter.setObject("ipaddress", ipAddress);
+						scripter.setObject("session", session);
+						try {
+							page = scripter.getHtml();
+						} catch (Exception error) {
+							page = error.toString();
+						}
+					}
+
+					response.setContentType("text/html");
+					response.setStatus(HttpServletResponse.SC_OK);
+					baseRequest.setHandled(true);
+					response.getWriter().println(page);
+					return;
+				}
+
+				FileInputStream fis = new FileInputStream(f);
+				OutputStream out = response.getOutputStream();
+
+				// write to out output stream
+				while (true) {
+					int bytedata = fis.read();
+					if (bytedata == -1) {
+						break;
+					}
+					try {
+						out.write(bytedata);
+					} catch (Exception error) {
+						break; // screw it, pray that it worked....
+					}
+				}
+
+				// flush and close streams.....
+				fis.close();
+				try {
+					out.close();
+				} catch (Exception error) {
+
+				}
+
+				response.setContentType(type);
+				response.setStatus(HttpServletResponse.SC_OK);
+				baseRequest.setHandled(true);
+				return;
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			//e.printStackTrace();
+			System.err.println(e.toString());
+		}
+		baseRequest.setHandled(true);
+		response.getWriter().println(html);
+		response.setStatus(code);
+	}
+
+
+	/**
+	 * Return the IP address of this
+	 * 
+	 * @param request
+	 *            HttpServletRequest. The web browser's request object.
+	 * @return String the ip:remote-port of this browswer's connection.
+	 */
+
+	public String getIpAddress(HttpServletRequest request) {
+		String ip = request.getHeader("x-forwarded-for");
+		if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+			ip = request.getHeader("Proxy-Client-IP");
+		}
+		if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+			ip = request.getHeader("WL-Proxy-Client-IP");
+		}
+		if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+			ip = request.getRemoteAddr();
+		}
+		ip += ":" + request.getRemotePort();
+		return ip;
+	}
+
+	  public static byte[] compressGZip(String uncompressed) throws Exception {
+	            ByteArrayOutputStream baos  = new ByteArrayOutputStream();
+	            GZIPOutputStream gzos       = new GZIPOutputStream(baos);
+	            byte [] uncompressedBytes   = uncompressed.getBytes();
+	            gzos.write(uncompressedBytes, 0, uncompressedBytes.length);
+	            gzos.close();
+	            return baos.toByteArray();
+	    }
+
+	public void getNavButtons(StringBuilder page, String query, String locale) {
+
+		String label = "My Town";
+		String btn = "btn-default";
+		if(locale != null) {
+			label = locale.replaceAll("\\+", " ");
+			label = label.replaceAll("%20", " ");
+		        btn = "btn-info";
+		}
+
+		page.append("<div class=\"container\">\n");
+		page.append("  <div class=\"col-sm-12 text-left\">\n");
+		page.append("     <div class=\"btn-group\">\n");
+
+		//page.append("  	   <a href=\"/post.html\" class=\"btn btn-info\" role=\"button\">My Store</a>\n");
+		//page.append("  	   <a href=\"/news.html\" class=\"btn btn-default\" role=\"button\">US News</a>\n");
+		//page.append("     <button type=\"button\" onclick=\"doStates();\" class=\"btn " + btn + "\" id=\"locale\">" + label + "</button>\n");
+
+		// comment out if calling this in parent
+		if(locale == null)           
+			// getBigStoreButton(page, query);
+
+		page.append("      </div>\n");
+		page.append("   </div>\n");
+		page.append("</div>\n");
+	}
+
+	public void getBigStoreButtons(StringBuilder page, String query) {
+                query = query.replaceAll("AND", "");
+                query = query.replaceAll("\"", "");
+
+		page.append("       <div class=\"container\" id=\"bigStores\">\n");
+		page.append("  <div class=\"col-lg-6 col-lg-offset-3 text-center\">\n");
+		page.append("         <div class=\"row\">\n");
+
+		page.append("            <a href=\"http://www.amazon.com/s/ref=nb_sb_noss_2?url=search-alias%3Daps&field-keywords=" + query + "\" target='_blank'><img src=\"/images/home/amazon.gif\" alt=\"Amazon\"></a>\n");
+				
+		page.append("            <a href=\"http://www.costco.com/CatalogSearch?storeId=10301&catalogId=10701&langId=-1&refine=&keyword=" + query + "\" target='_blank'><img src=\"/images/home/costco.gif\" alt=\"Costco\"></a>\n");
+				
+		page.append("            <a href=\"http://www.walmart.com/search/?query=" + query + "\" target='_blank'><img src=\"/images/home/walmart.gif\" alt=\"Walmart\"></a>\n");
+
+		page.append("            <a href=\"http://search.yahoo.com/search/?p=" + query + "\" target='_blank'><img src=\"/images/home/yahoo.gif\" alt=\"Yahoo\"></a>\n");
+				
+		page.append("            <a href=\"https://www.google.com/search?q=" + query + "&ie=utf-8&oe=utf-8\" target='_blank'><img src=\"/images/home/google.gif\" alt=\"Google\"></a>\n");
+				
+		page.append("          </div>\n");
+		page.append("       </div>\n");
+		page.append("       </div>\n");
+	}
+				
+				
+
+	public void getBigStoreButton(StringBuilder page, String query) {
+                query = query.replaceAll("AND", "");
+                query = query.replaceAll("\"", "");
+
+		page.append("         <div class=\"btn-group\">\n");
+		page.append("            <button type=\"button\" class=\"btn btn-info dropdown-toggle\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\">Amazon <span class=\"caret-right\"></span></button>\n");
+		page.append("             <ul class=\"dropdown-menu\" role=\"menu\">\n");
+			
+		page.append("            <li><a href=\"http://www.amazon.com/s/ref=nb_sb_noss_2?url=search-alias%3Daps&field-keywords=" + query + "\" target='_blank'><img src=\"/images/home/amazon.gif\" alt=\"Amazon\"></a><li>\n");
+				
+		page.append("            <li><a href=\"http://www.costco.com/CatalogSearch?storeId=10301&catalogId=10701&langId=-1&refine=&keyword=" + query + "\" target='_blank'><img src=\"/images/home/costco.gif\" alt=\"Costco\"></a><li>\n");
+				
+		page.append("            <li><a href=\"http://www.walmart.com/search/?query=" + query + "\" target='_blank'><img src=\"/images/home/walmart.gif\" alt=\"Walmart\"></a><li>\n");
+				
+		page.append("                <li role=\"separator\" class=\"divider\"></li>\n"); 
+
+		page.append("            <li><a href=\"http://search.yahoo.com/search/?p=" + query + "\" target='_blank'><img src=\"/images/home/yahoo.gif\" alt=\"Yahoo\"></a><li>\n");
+				
+		page.append("            <li><a href=\"https://www.google.com/search?q=" + query + "&ie=utf-8&oe=utf-8\" target='_blank'><img src=\"/images/home/google.gif\" alt=\"Google\"></a><li>\n");
+		page.append("		</ul>\n");
+		page.append("      </div>\n");
+	}
+
+
+	public void getAmazonDetails(StringBuilder page, String query, int index, String href, String details) {
+
+
+		page.append("         <div class=\"btn-group company\">\n");
+		page.append("            <button type=\"button\" class=\"btn btn-lg btn-default indexpadding disabled\">" + index + "</button>\n");
+		page.append("              <a href=\"http://" + href + "\" onclick=\"openStore('"+href+"')\" target=\"_blank\" class=\"btn btn-lg btn-info\">Amazon</a>\n");
+
+		page.append("           </div>");
+		page.append("              <div class='desc city-state'>");
+		page.append("out of Seattle, WA");
+		page.append("	      </div>");
+
+		page.append("           <div class='desc sort-info last-line'>");
+		page.append(details);
+		page.append("           </div>");
+        }
+
+
+	public void getAmazonButton(StringBuilder page, String query, int index, String href, String details) {
+
+		page.append("         <div class='col-md-6'>\n");
+		page.append("            <div class='panel panel-default'>\n");
+		page.append("               <div class='panel-heading'>\n");
+		page.append("                  <div class=\"btn-group company\">\n");
+
+		page.append("                     <button type=\"button\" class=\"btn btn-default btn-lg indexpadding disabled\">" + index + "</button>\n");
+
+		page.append("                       <a href=\"" + href + "\" data-toggle=\"tooltip\" title='" + details +"' onclick=\"openStore('"+href+"')\" target=\"_blank\" class=\"btn btn-info btn-lg\">Amazon</a>\n");
+		page.append("                  </div>\n");
+		page.append("               </div>\n");
+		page.append("            </div>\n");
+		page.append("         </div>\n");
+	}
+
+	public void getGoogleDetails(StringBuilder page, String query, int index, String href, String details) {
+
+
+		page.append("         <div class=\"btn-group company\">\n");
+		page.append("            <button type=\"button\" class=\"btn btn-lg btn-default indexpadding disabled\">" + index + "</button>\n");
+		page.append("              <a href=\"http://" + href + "\" onclick=\"openStore('"+href+"')\" target=\"_blank\" class=\"btn btn-lg btn-info\">Google</a>\n");
+
+		page.append("           </div>");
+		page.append("              <div class='desc city-state'>");
+		page.append("out of Mountain View, CA");
+		page.append("	      </div>");
+
+		page.append("           <div class='desc sort-info last-line'>");
+		page.append(details);
+		page.append("           </div>");
+        }
+
+
+	public void getGoogleButton(StringBuilder page, String query, int index, String href, String details) {
+
+		page.append("         <div class='col-md-6'>\n");
+		page.append("            <div class='panel panel-default'>\n");
+		page.append("               <div class='panel-heading'>\n");
+		page.append("                  <div class=\"btn-group company\">\n");
+
+		page.append("                     <button type=\"button\" class=\"btn btn-default btn-lg indexpadding disabled\">" + index + "</button>\n");
+
+		page.append("                       <a href=\"" + href + "\" data-toggle=\"tooltip\" title='" + details +"' onclick=\"openStore('"+href+"')\" target=\"_blank\" class=\"btn btn-info btn-lg\">Google</a>\n");
+		page.append("                  </div>\n");
+		page.append("               </div>\n");
+		page.append("            </div>\n");
+		page.append("         </div>\n");
+	}
+
+
+	public void getGimmeUSAsearch_logo(StringBuilder page) {
+		page.append("<div class=\"container\">\n");
+		page.append("     <img src=\"/images/search-logo.small.gif\" class=\"img-responsive center-block top-buffer\" alt=\"GimmeUSA\">");
+		page.append("</div>\n");
+	}
+
+	public void getGimmeUSA(StringBuilder page) {
+		page.append("<div class=\"container\">\n");
+		page.append("  <div class=\"col-lg-6 col-lg-offset-3 text-center\">\n");
+		page.append("     <div class=\"back-logo\">\n");
+		page.append("        <h3><span class=\"span\">gimmeUSA.com</span></h3>\n");
+		// page.append("        <p>Better Search. Better Shopping.&#8482;<br>gimmeUSA.com</p>\n");
+		page.append("     </div>\n");
+		page.append("  </div>\n");
+		page.append("</div>\n");
+	}
+	
+	public String getSetLocaleText(String locale, int numResults, String radius) {
+		StringBuilder page =  new StringBuilder(); 
+		locale = locale.replaceAll("\\+", " ");
+		page.append("<div class='col-md-9 col-md-offset-2'>");
+		page.append("   <div class='search-result clearfix'>");
+		page.append("      <div class=\"desc\">");
+		page.append("         There are " + numResults + " businesses <a href=\"/post.html\">posted</a> in " + locale + ".");
+		page.append(" We will search businesses within " + radius + " miles from downtown."); 
+		page.append("      </div>");
+		page.append("   </div>");
+		page.append("</div>");
+		String html = page.toString();
+		return(html);
+	}
+
+	public int getRadius(int num_businesses) {
+		int radius = 10;
+		if(num_businesses <= 50) {
+         		radius = 50;
+      		}
+      		else if(num_businesses > 50 && num_businesses <= 200) {
+         		radius = 40;
+      		}
+      		else if(num_businesses > 200 && num_businesses <= 500) {
+         		radius = 25;
+      		}
+      		else if(num_businesses > 500 && num_businesses <= 1000) {
+         		radius = 15;
+      		}
+		return(radius);
+	}
+
+	public void getLocaleButton(StringBuilder page, String locale) {
+		if(locale == null) {
+			return;
+		}
+		page.append("<div class=\"container\">\n");
+		page.append("  <div class=\"col-sm-12 text-left top-buffer\">\n");
+		//page.append("     <a href=\"/us_states.html\" class=\"btn btn-default\" id=\"locale\" role=\"button\">" + locale + "</a>\n");
+		page.append("  </div>\n");
+		page.append("</div>\n");
+	}
+
+
+	public void getSearchBar(StringBuilder page, String query, Boolean local_query, String locale) {
+		page.append("<div class=\"container top-buffer\">\n");
+		page.append("   <div class=\"search-index\">\n");
+		page.append("      <div class=\"col-sm-8 col-sm-offset-2\">\n");
+		page.append("         <div class=\"row\">\n");
+		page.append("            <form id=\"tfnewsearch\">\n");
+		page.append("               <div class=\"input-group\">\n");
+		if(local_query != null && local_query == false) {
+			page.append("                  <input type=\"text\" onclick=\"hideStores()\" class=\"form-control\" id=\"tftextinput\" name=\"q\" value=\"" + query + "\">\n");
+		}
+		else {
+			page.append("                  <input type=\"text\" class=\"form-control\" id=\"tftextinput\" name=\"q\" placeholder=\"I'm looking for a ...\">\n");
+		}
+		page.append("                  <span class=\"input-group-btn\">\n");
+		page.append("                     <button type=\"submit\" class=\"btn btn-info\"><span class=\"glyphicon glyphicon-search\"></span></button>\n");
+		page.append("                  </span>\n");
+		page.append("               </div>\n");
+		page.append("            </form>\n");
+		page.append("          </div>\n");
+		page.append("          <div class=\"tfclear\"></div>\n");
+		page.append("          <script>\n");
+		page.append("             var a = document.getElementById('tfnewsearch');\n");
+		page.append("             a.addEventListener('submit',function(e) {\n");
+		page.append("                e.preventDefault();\n");
+		page.append("                doQuery();\n");
+		page.append("             });\n");
+		page.append("           </script>\n");
+		page.append("       </div>\n");
+		page.append("   </div>\n");
+		page.append("</div>\n");
+	}
+
+	public void getSmallBizBar(StringBuilder page) {
+		page.append("<div class=\"container\">");
+		page.append("   <div class=\"row\">");
+		page.append("      <div class=\"col-sm-12 pull_left\">");
+		page.append("         <div class=\"features_items\">");                 
+		page.append("            <h2 class=\"title text-left\">Try Small Stores First <em>!</em></h2>");
+                page.append("         </div>");
+                page.append("      </div>");
+                page.append("   </div>");
+                page.append("</div>");
+	}
+
+       public void getDomainNameText(StringBuilder page) {
+		page.append("<div class='col-lg-6 col-lg-offset-3 text-center'>\n");
+		page.append("<div class='sort-info'>\n");
+
+		page.append("If this is a valid, registered domain name and you see \"No results\" we will look at the website to see if it fits on GimmeUSA. If you do get results, this is the searchable text extracted from one or more pages using <a href=\"https://en.wikipedia.org/wiki/Lynx_%28web_browser%29\">Lynx</a>. This information is very useful for Search Engine Optimization (SEO) work.");
+
+		page.append("</div>\n");
+		page.append("</div>\n");
+        }
+
+       public void getNoResults(StringBuilder page) {
+		page.append("<div class='col-lg-6 col-lg-offset-3 text-left'>\n");
+		page.append("<div class='sort-info'>\n");
+
+		page.append("No Results.");
+
+		page.append("</div>\n");
+		page.append("</div>\n");
+        }
+
+}
