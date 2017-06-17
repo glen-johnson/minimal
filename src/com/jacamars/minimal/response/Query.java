@@ -36,7 +36,7 @@ public class Query {
 			dt.append("<div class='text-center top-buffer bottom-medbuffer'>");
 			dt.append("<h3><em>Wow, no posted store carries this item!</em></h3>");
 			dt.append("<h4>If you know of a great business that<br>");
-			dt.append("has it for sale, please post their website above.</h4>");
+			dt.append("has it for sale online, please post their website <a href='/page-post.html'>here</a>.</h4>");
 			dt.append("</div>\n");
 		}
 
