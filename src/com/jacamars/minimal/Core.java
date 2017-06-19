@@ -125,15 +125,52 @@ public enum Core {
 					num_words = 4;
 			}
 
-			String fl      = "&fl=id,html";
+			// specify Dismax
 			String qp      = "defType=dismax";
-			String q       = "&q=" + key;
-			String qf      = "&qf=title+description+field_1";
-			String ps      = "&ps=" + num_words * 4;
-			String pf      = "&pf=title^10000+description+field_1" + ps;
-			String details = "&rows=" + num_rows + "&start=" + start_rows + "&mm=" + num_words;
 
-			endPoint = SOLR + "collection1/multiple" + "?" + qp + q + qf + pf + fl + details;
+			// The user's query
+			String q       = "&q=" + key;
+
+			// The qf parameter introduces a list of fields, each of
+			// which is assigned a boost factor to increase or decrease
+			// that particular field's importance in the query.
+			String qf      = "&qf=title^1.8+description^1.5+field_1";
+
+			
+			// if 3 or less words in query, all must be present
+			// 4 or more, 75% must be present
+			String mm      = "&mm=3%3C75%25";
+
+			// ------------------------------------------------------
+			// OK, we now have a set of docs that match the above
+			// Lets filter and sort.
+			// ------------------------------------------------------
+
+			// boost the score of documents in cases where all of the terms
+			// in the q parameter appear in close proximity
+			String pf      = "&pf=title^1.8+description^1.5+field_1";
+
+			// the amount of "phrase slop" to apply to queries specified with the pf parameter
+			String ps      = "&ps=" + num_words * 4;
+
+			//  amount of slop permitted on phrase queries explicitly
+			// included in the user's query string with the qf parameter
+			String qs      = "&qs=" + num_words * 4;
+
+			// for multiple field matches, suppress the scores of the lower scoring fields.
+			// example: if description and field_1 match, suppress the score addition of field_1
+			// so that other docs with description matches dont get trumped by field_1
+			String tie     = "&tie=0.1";
+
+			// fields returned
+			String fl      = "&fl=id,html";
+
+			// where to start and how many to return
+			String rows = "&rows=" + num_rows;
+			String start = "&start=" + start_rows;
+
+			// build the query
+			endPoint = SOLR + "collection1/multiple" + "?" + qp + q + qf + mm + pf + ps + qs + tie + fl + start + rows;
 		}
 	        System.out.println("EP: " + endPoint);
 
